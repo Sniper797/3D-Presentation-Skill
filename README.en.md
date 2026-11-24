@@ -23,7 +23,7 @@ Open the file with a double click; no server, no internet. Arrow keys move betwe
 
 ![Four slides of the pumping-station example](docs/preview.jpg)
 
-GitHub shows the file's source, not the running page, so clone the repository and open the file from your own disk.
+**Open them live in the browser:** [both examples](https://sniper797.github.io/3D-Presentation-Skill/) · [the conveyor](https://sniper797.github.io/3D-Presentation-Skill/example-conveyor/out/index.html) · [the pumping station](https://sniper797.github.io/3D-Presentation-Skill/example/out/index.html). The links in the table above show the file's source on GitHub, not the running page.
 
 To rebuild an example and measure it after changing something:
 
@@ -45,6 +45,7 @@ python check.py example --live
 | `check.py` | Opens every slide in headless Chrome on the real GPU: clashes, text, callouts, frame time, and a picture of each slide. `--at` photographs chosen moments of the motion |
 | `stl2models.py` | Packs STL files for the scene to read |
 | `to-powerpoint.md`, `pptx/` | The same deck as a PowerPoint file, still or with motion, and as a film of the whole deck |
+| `index.html` | The page of the two examples on GitHub Pages. Not part of the skill |
 | `recipes/` | An index of realistic parts (turbine, pump, boiler, pylons) from a steam power plant scene. The scene itself is not published here; see "Where it came from" |
 
 ## Install

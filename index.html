@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3D Presentation Skill</title>
+<meta name="description" content="A Claude Code skill that builds a 3D presentation in one offline HTML file. Two live examples.">
+<style>
+:root { --gold: #d9b061; --gold2: #b8892b; --bg: #03060c; --navy: #0b1a30; --ink: #f2f4f7; --ink2: #c3ccd9; --muted: #8d99ac; }
+* { box-sizing: border-box; }
+html { background: var(--bg); }
+body { margin: 0; min-height: 100vh; background: radial-gradient(ellipse 120% 70% at 50% 0%, var(--navy) 0%, var(--bg) 62%) no-repeat var(--bg); color: var(--ink); font-family: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif; line-height: 1.55; }
+main { max-width: 1060px; margin: 0 auto; padding: 56px 24px 64px; }
+.kick { font-size: 13px; letter-spacing: .32em; color: var(--gold); font-weight: 700; text-transform: uppercase; }
+h1 { font-family: Cambria, Georgia, "Times New Roman", serif; font-size: clamp(34px, 6vw, 58px); line-height: 1.06; margin: 14px 0 18px; text-wrap: balance; }
+h1 em { font-style: normal; color: var(--gold); }
+.lead { font-size: clamp(17px, 2.1vw, 20px); color: var(--ink2); max-width: 46em; margin: 0 0 10px; }
+.ar { font-size: clamp(16px, 2vw, 19px); color: var(--ink2); max-width: 46em; margin: 0 0 34px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 22px; }
+.card { display: flex; flex-direction: column; background: rgba(10, 20, 36, .84); border: 1px solid rgba(217, 176, 97, .32); border-top: 4px solid var(--gold); border-radius: 10px; overflow: hidden; color: inherit; text-decoration: none; transition: transform .2s ease, border-color .2s ease; }
+.card:hover, .card:focus-visible { transform: translateY(-3px); border-color: var(--gold); outline: none; }
+.card img { width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; display: block; background: #05080f; }
+.card div { padding: 18px 20px 20px; }
+.card h2 { font-family: Cambria, Georgia, serif; font-size: 23px; margin: 0 0 6px; }
+.card p { margin: 0 0 14px; color: var(--ink2); font-size: 15.5px; }
+.card span { display: inline-block; font-weight: 700; font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--bg); background: var(--gold); border-radius: 4px; padding: 7px 14px; }
+.note { margin: 26px 0 0; color: var(--muted); font-size: 14.5px; }
+.note kbd { font: inherit; color: var(--ink); border: 1px solid rgba(195, 204, 217, .35); border-radius: 4px; padding: 0 6px; }
+footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(195, 204, 217, .22); display: flex; flex-wrap: wrap; gap: 10px 26px; font-size: 15px; }
+footer a { color: var(--gold); text-decoration: none; }
+footer a:hover, footer a:focus-visible { text-decoration: underline; }
+@media (prefers-reduced-motion: reduce) { .card { transition: none; } }
+</style>
+</head>
+<body>
+<main>
+  <div class="kick">A Claude Code skill</div>
+  <h1>A 3D presentation in <em>one HTML file</em></h1>
+  <p class="lead">One 3D world stands behind every slide. Each slide is a camera on it, and "next" is a flight to the next part. The two decks below were built with the skill; each is a single file of about 112 KB with its own engine inside.</p>
+  <p class="ar" lang="ar" dir="rtl">مهارةٌ لـ Claude Code تبني عرضاً ثلاثيّ الأبعاد في ملفّ HTML واحد: عالَمٌ واحد خلف الشرائح، وكلّ شريحةٍ كاميرا عليه.</p>
+
+  <div class="cards">
+    <a class="card" href="example-conveyor/out/index.html">
+      <img src="docs/conveyor.gif" alt="A conveyor with coloured cans; a servo arm pushes a red can into a side bin" width="640" height="360">
+      <div>
+        <h2>Colour-sorting conveyor</h2>
+        <p>Five slides. Cans travel on the belt, and a servo arm pushes the red ones, which tip over the edge and fall into their bin.</p>
+        <span>Open the deck</span>
+      </div>
+    </a>
+    <a class="card" href="example/out/index.html">
+      <img src="docs/preview.jpg" alt="Four slides of a solar water-pumping station: cover, pump, the whole site, the pump pulled apart" width="1920" height="1080">
+      <div>
+        <h2>Solar water-pumping station</h2>
+        <p>Ten slides, two scenes. A site at dusk where you follow the energy and then the water, and a pump pulled apart along its shaft.</p>
+        <span>Open the deck</span>
+      </div>
+    </a>
+  </div>
+
+  <p class="note">In a deck: <kbd>&rarr;</kbd> and <kbd>&larr;</kbd> move between slides (or click the right and left of the screen), <kbd>F</kbd> goes full screen. It needs WebGL and reads best on a computer, or on a phone held sideways.</p>
+
+  <footer>
+    <a href="https://github.com/Sniper797/3D-Presentation-Skill">The repository on GitHub</a>
+    <a href="https://github.com/Sniper797/3D-Presentation-Skill/blob/main/README.en.md">Guide in English</a>
+    <a href="https://github.com/Sniper797/3D-Presentation-Skill/blob/main/README.md">الدليل بالعربيّة</a>
+    <a href="https://github.com/Sniper797/3D-Presentation-Skill/blob/main/LICENSE.md">License</a>
+  </footer>
+</main>
+</body>
+</html>
