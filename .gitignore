@@ -1,0 +1,10 @@
+node_modules/
+__pycache__/
+*.pyc
+.vscode/
+# what check.py and the recorders write; the built examples in example*/out/ are kept so they open from a clone
+example*/shots/
+example*/pptx/
+example*/video/
+# the scene of a student team's own presentation: kept on this machine, not published (see recipes/README.md)
+recipes/steam-plant-scene.js

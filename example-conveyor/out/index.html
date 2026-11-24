@@ -1,0 +1,1278 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+/* deck.css: the look of the deck. Every size is in vw / vh, so the slide is the same picture on any screen.
+   A deck changes the palette by redefining the variables in its own <style> (slides.html), not by editing this file. */
+:root {
+  --gold: #d9b061; --gold2: #b8892b; --accent-rgb: 217,176,97;        /* accent: rules, kickers, numbers, callouts */
+  --bg: #03060c; --bg-rgb: 3,7,14; --scrim-rgb: 4,9,18; --card-rgb: 10,20,36; /* the dark behind the text */
+  --navy: #0b1a30; --ink: #f2f4f7; --ink2: #c3ccd9; --muted: #8d99ac; --blue: #2a78d6; --orange: #eb6834;
+  --cover-a: #24457f; --chip: #1b3566;                                 /* cover: side bar and course chip */
+  --serif: Cambria, Georgia, "Times New Roman", serif; --sans: "Segoe UI", Calibri, Arial, sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); overflow: hidden; color: var(--ink); font-family: var(--sans); }
+#gl { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; }
+#dim { position: fixed; inset: 0; background: radial-gradient(ellipse at 50% 50%, rgba(var(--bg-rgb),.8), rgba(var(--bg-rgb),.95)); opacity: 0; transition: opacity 1.2s ease; pointer-events: none; }
+#vignette { position: fixed; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 45%, rgba(0,0,0,0) 55%, rgba(0,0,0,.55) 100%); }
+#labels { position: fixed; inset: 0; pointer-events: none; }
+.lbl { position: absolute; left: 0; top: 0; width: 0; height: 0; transition: opacity .6s ease; opacity: 0; --lift: 5vh; }
+.lbl span { position: absolute; left: 0; bottom: var(--lift); transform: translateX(-50%); font-size: .98vw; font-weight: 600; letter-spacing: .05em; color: #fff; background: rgba(var(--scrim-rgb),.82); border: 1px solid rgba(var(--accent-rgb),.7); padding: .22vw .7vw .26vw; border-radius: .25vw; white-space: nowrap; box-shadow: 0 .3vw 1vw rgba(0,0,0,.45); }
+.lbl i { position: absolute; left: -.5px; bottom: 0; width: 1px; height: var(--lift); background: linear-gradient(to top, rgba(var(--accent-rgb),.95), rgba(var(--accent-rgb),.4)); }
+.lbl i::after { content: ""; position: absolute; left: -.22vw; bottom: -.22vw; width: .44vw; height: .44vw; margin-left: .5px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 .7vw rgba(var(--accent-rgb),.95); }
+.lbl.num b { position: absolute; left: -1.1vw; top: -1.1vw; width: 2.2vw; height: 2.2vw; background: var(--gold2); color: #fff; border: 2px solid #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.1vw; font-weight: 700; box-shadow: 0 0 1.2vw rgba(var(--accent-rgb),.8); }
+/* chrome */
+#chap { position: fixed; top: 2.4vh; left: 3vw; font-size: .9vw; letter-spacing: .32em; color: var(--gold); font-weight: 700; text-transform: uppercase; opacity: .9; transition: opacity .8s ease; }
+#logo { position: fixed; top: 1.8vh; right: 2.4vw; display: flex; align-items: center; gap: .7vw; font-size: .8vw; color: var(--ink2); letter-spacing: .06em; text-align: right; line-height: 1.35; transition: opacity .8s ease; }
+#logo img { width: 3.2vw; height: 3.2vw; border-radius: 50%; background: #fff; padding: .15vw; object-fit: contain; }
+body.on-cover #chap, body.on-cover #logo { opacity: 0; }
+#prog { position: fixed; left: 0; bottom: 0; height: .45vh; background: linear-gradient(90deg, var(--gold2), var(--gold)); transition: width .8s ease; }
+#count { position: fixed; bottom: 1.6vh; right: 2.4vw; font-size: .85vw; color: var(--muted); letter-spacing: .15em; font-variant-numeric: tabular-nums; }
+#hint { position: fixed; bottom: 1.6vh; left: 50%; transform: translateX(-50%); font-size: .8vw; color: var(--muted); letter-spacing: .08em; transition: opacity 1s; white-space: nowrap; }
+/* slides */
+.slide { position: fixed; inset: 0; pointer-events: none; opacity: 0; transition: opacity .9s ease; }
+.slide.on { opacity: 1; pointer-events: auto; }
+.slide .a { opacity: 0; transform: translateY(2.2vh); transition: opacity 1s ease, transform 1s cubic-bezier(.2,.7,.2,1); }
+.slide.on .a { opacity: 1; transform: none; }
+.slide.on .a.d1 { transition-delay: .35s; } .slide.on .a.d2 { transition-delay: .7s; } .slide.on .a.d3 { transition-delay: 1.05s; } .slide.on .a.d4 { transition-delay: 1.4s; } .slide.on .a.d5 { transition-delay: 1.75s; } .slide.on .a.d6 { transition-delay: 2.1s; }
+.panel { position: absolute; top: 50%; transform: translateY(-50%); width: 36vw; padding: 3.2vw 3vw; }
+.panel.left { left: 2.6vw; background: linear-gradient(90deg, rgba(var(--scrim-rgb),.92) 0%, rgba(var(--scrim-rgb),.8) 72%, rgba(var(--scrim-rgb),0) 100%); border-left: .25vw solid var(--gold); }
+.panel.bottom { left: 4vw; right: 4vw; top: auto; bottom: 4vh; transform: none; width: auto; padding: 1.4vw 2.4vw 1.2vw; background: linear-gradient(0deg, rgba(var(--scrim-rgb),.94) 0%, rgba(var(--scrim-rgb),.84) 70%, rgba(var(--scrim-rgb),0) 100%); border-top: .25vw solid var(--gold); display: grid; grid-template-columns: 1fr 1.5fr; gap: 0 3vw; }
+.panel.bottom h2 { grid-column: 1; margin-bottom: 0; } .panel.bottom .kick { grid-column: 1; } .panel.bottom p { grid-column: 2; }
+.panel.bottom .body { grid-column: 2; grid-row: 1 / span 2; align-self: center; } .panel.bottom .body p:last-child { margin-bottom: 0; }
+.panel.right { right: 2.6vw; background: linear-gradient(270deg, rgba(var(--scrim-rgb),.92) 0%, rgba(var(--scrim-rgb),.8) 72%, rgba(var(--scrim-rgb),0) 100%); border-right: .25vw solid var(--gold); text-align: right; }
+.kick { font-size: .95vw; letter-spacing: .34em; color: var(--gold); font-weight: 700; text-transform: uppercase; margin-bottom: 1.1vh; }
+h2 { font-family: var(--serif); font-weight: 700; font-size: 3.1vw; line-height: 1.08; margin: 0 0 1.8vh; letter-spacing: -.005em; text-wrap: balance; }
+h2 em { font-style: normal; color: var(--gold); white-space: nowrap; }
+p, li { font-size: 1.32vw; line-height: 1.5; color: var(--ink2); margin: 0 0 1.2vh; text-wrap: pretty; }
+p b, li b { color: #fff; }
+.nb { white-space: nowrap; }
+.eq { font-family: var(--serif); font-size: 1.5vw; color: #fff; }
+ul { margin: 0; padding-left: 1.3vw; }
+.proc { display: inline-block; font-family: var(--serif); font-weight: 700; font-size: 2vw; color: #fff; background: var(--gold2); border-radius: .4vw; padding: .1vw 1vw; margin-bottom: 1.4vh; letter-spacing: .04em; }
+.cap { font-size: .95vw; color: var(--muted); letter-spacing: .04em; margin-top: .6vh; }
+.stats { display: flex; gap: 2.4vw; margin: 2vh 0 1.4vh; }
+.stat .v { font-family: var(--serif); font-size: 2.6vw; font-weight: 700; color: var(--gold); line-height: 1.05; font-variant-numeric: tabular-nums; }
+.stat .l { font-size: .95vw; color: var(--ink2); line-height: 1.3; margin-top: .4vh; }
+.steps { display: grid; grid-template-columns: 1fr 1fr; gap: .7vh 1.6vw; margin: .4vh 0 1.8vh; text-align: left; font-size: 1.25vw; color: var(--ink2); }
+.steps b { display: inline-block; min-width: 3.4vw; font-family: var(--serif); color: var(--gold); }
+.full { position: absolute; inset: 9vh 6vw 8vh; display: flex; flex-direction: column; justify-content: center; }
+.cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2vw; margin-top: 1.6vh; }
+.card { background: rgba(var(--card-rgb),.84); border: 1px solid rgba(var(--accent-rgb),.32); border-top: .3vw solid var(--gold); border-radius: .5vw; padding: 1.1vw 1.3vw 1vw; }
+.card h3 { margin: 0 0 .9vh; font-family: var(--serif); font-size: 1.42vw; color: #fff; }
+.card p { font-size: 1.04vw; line-height: 1.42; margin: 0 0 .9vh; }
+.card p:last-child { margin-bottom: 0; }
+.card .pr, .card .so { display: block; font-size: .78vw; letter-spacing: .14em; text-transform: uppercase; font-weight: 700; margin-bottom: .2vh; }
+.card .pr { color: #ff9b7a; } .card .so { color: #8fd4a8; }
+.photos { display: grid; grid-template-columns: repeat(3, 1fr); gap: .8vw; }
+.photos img { width: 100%; height: 22vh; object-fit: cover; border-radius: .4vw; box-shadow: 0 .8vw 2vw rgba(0,0,0,.5); }
+.bar { height: 3.2vh; border-radius: .35vw; background: var(--blue); width: 0; transition: width 1.8s cubic-bezier(.2,.7,.2,1) .6s; }
+.slide.on .bar { width: var(--w); }
+.barrow { display: grid; grid-template-columns: 17vw 1fr 9vw; gap: 1vw; align-items: center; margin: 1.3vh 0; font-size: 1.2vw; color: var(--ink2); }
+.barrow .n { text-align: right; color: #fff; }
+.barrow .v { color: var(--gold); font-weight: 700; font-variant-numeric: tabular-nums; }
+/* cover */
+.cover::before { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(var(--scrim-rgb),.96) 0%, rgba(var(--scrim-rgb),.9) 34%, rgba(var(--scrim-rgb),.5) 54%, rgba(var(--scrim-rgb),0) 74%); }
+.cover .bar-side { position: absolute; left: 0; top: 0; bottom: 0; width: .6vw; background: linear-gradient(to bottom, var(--cover-a) 0, var(--cover-a) 74%, var(--gold2) 74%, var(--gold2) 100%); }
+.cv { position: absolute; left: 6.6vw; top: 6.5vh; bottom: 7.5vh; width: 47vw; display: flex; flex-direction: column; }
+.cv-uni { display: flex; align-items: center; gap: 1.1vw; }
+.cv-uni img { width: 4.8vw; height: 4.8vw; border-radius: 50%; background: #fff; padding: .2vw; object-fit: contain; }
+.cv-uni b { display: block; font-family: var(--serif); font-size: 1.45vw; color: #fff; letter-spacing: .01em; }
+.cv-uni span { display: block; font-size: .98vw; color: var(--ink2); line-height: 1.45; }
+.cv-rule { height: .5vh; width: 0; background: var(--gold2); margin-top: 9vh; transition: width 1.4s cubic-bezier(.2,.7,.2,1) .3s; }
+.cover.on .cv-rule { width: 7.4vw; }
+body.capture .cv-rule { transition: none; }
+.cv h1 { font-family: var(--serif); font-size: 4.25vw; line-height: 1.08; margin: 4.4vh 0 2.6vh; letter-spacing: -.01em; white-space: nowrap; text-shadow: 0 .3vw 2vw rgba(0,0,0,.6); }
+.cv-sub { font-family: var(--serif); font-size: 1.62vw; color: #dbe3ee; margin: 0 0 4.4vh; }
+.cv-chip { align-self: flex-start; font-size: .92vw; font-weight: 700; letter-spacing: .28em; color: #fff; background: var(--chip); border: 1px solid rgba(var(--accent-rgb),.55); border-radius: .2vw; padding: 1vh 1.3vw; }
+.cv-chip i { font-style: normal; color: var(--gold); margin: 0 .5vw; }
+.cv-fill { flex: 1; }
+.cv-line { height: 1px; background: rgba(195,204,217,.35); margin-bottom: 3vh; }
+.cv-team { display: grid; grid-template-columns: 19vw 1fr; gap: 0 2vw; }
+.cv-team h4 { margin: 0 0 1.5vh; font-size: .76vw; letter-spacing: .3em; color: var(--gold); font-weight: 700; text-transform: uppercase; }
+.cv-team p { font-size: 1.08vw; color: #fff; margin: 0; line-height: 1.5; }
+.cv-team table { border-collapse: collapse; font-size: 1.08vw; color: #fff; }
+.cv-team td { padding: 0 2.6vw .75vh 0; white-space: nowrap; }
+.cv-team td + td { color: var(--muted); letter-spacing: .06em; font-variant-numeric: tabular-nums; padding-right: 0; }
+.cv-place { margin-top: 3.2vh; font-size: .76vw; letter-spacing: .3em; color: var(--muted); text-transform: uppercase; }
+.cv-place i { font-style: normal; margin: 0 .6vw; }
+/* title & prologue */
+.prolog { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.prolog p { font-family: var(--serif); font-size: 2.3vw; color: #e9edf3; margin: 1.2vh 0; line-height: 1.35; max-width: 68vw; text-shadow: 0 .2vw 1.2vw rgba(0,0,0,.9); }
+.prolog p em { color: var(--gold); font-style: normal; }
+.titlecard { position: absolute; left: 6vw; top: 50%; transform: translateY(-50%); width: 52vw; }
+.titlecard::before { content: ""; position: absolute; inset: -12vh -8vw -12vh -6vw; background: radial-gradient(ellipse at 30% 50%, rgba(var(--scrim-rgb),.82) 0%, rgba(var(--scrim-rgb),.55) 45%, rgba(var(--scrim-rgb),0) 72%); z-index: -1; }
+.titlecard .k { font-size: 1.05vw; letter-spacing: .5em; color: var(--gold); font-weight: 700; }
+.titlecard h1 { font-family: var(--serif); font-size: 6.2vw; line-height: .98; margin: 2vh 0 2.2vh; letter-spacing: -.01em; text-shadow: 0 .4vw 2.4vw rgba(0,0,0,.7); }
+.titlecard h1 span { color: var(--gold); }
+.titlecard .sub { font-size: 1.6vw; color: #dbe3ee; line-height: 1.45; max-width: 44vw; text-shadow: 0 .2vw 1vw rgba(0,0,0,.8); text-wrap: pretty; }
+.titlecard .course { margin-top: 3vh; font-size: 1.2vw; letter-spacing: .3em; font-weight: 700; color: #fff; }
+.titlecard .team { margin-top: 3.4vh; display: grid; grid-template-columns: auto auto; justify-content: start; gap: 0 3.6vw; font-size: 1vw; color: var(--ink2); line-height: 1.6; white-space: nowrap; }
+.titlecard .team b { display: block; color: var(--gold); letter-spacing: .25em; font-size: .78vw; margin-bottom: .4vh; }
+.titlecard .team b.gap { margin-top: 1.7vh; }
+svg text { font-family: var(--sans); }
+.draw { stroke-dasharray: 2000; stroke-dashoffset: 2000; }
+.slide.on .draw { animation: draw 3.2s ease forwards .5s; }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+.pop { opacity: 0; }
+.slide.on .pop { animation: pop .6s ease forwards; }
+@keyframes pop { from { opacity: 0; transform: scale(.3); } to { opacity: 1; transform: scale(1); } }
+body.capture .slide, body.capture .slide .a, body.capture .bar, body.capture #dim, body.capture .lbl, body.capture #chap, body.capture #logo, body.capture #prog { transition: none !important; }
+body.capture .draw { animation: none !important; stroke-dashoffset: 0; }
+body.capture .pop { animation: none !important; opacity: 1; }
+body.capture #hint { display: none; }
+@media (prefers-reduced-motion: reduce) { .slide .a, .bar, .cv-rule { transition-duration: .01s !important; transition-delay: 0s !important; } }
+/* Arabic / right-to-left decks: <!-- deck: lang=ar dir=rtl --> in slides.html. Letter-spacing breaks the joins between Arabic letters. */
+html[dir=rtl] body, html[dir=rtl] body * { letter-spacing: 0 !important; text-transform: none !important; }
+html[dir=rtl] { --serif: "Segoe UI Semibold", "Segoe UI", Tahoma, sans-serif; --sans: "Segoe UI", Tahoma, Arial, sans-serif; }
+html[dir=rtl] ul { padding-left: 0; padding-right: 1.3vw; }
+html[dir=rtl] .steps, html[dir=rtl] .barrow .n { text-align: right; }
+/* a left panel fades out to the right, exactly where right-aligned Arabic text sits: keep the scrim solid under the text */
+html[dir=rtl] .panel.left { text-align: right; padding-right: 4.4vw; background: linear-gradient(90deg, rgba(var(--scrim-rgb),.92) 0%, rgba(var(--scrim-rgb),.88) 84%, rgba(var(--scrim-rgb),0) 100%); }
+html[dir=rtl] .nb, html[dir=rtl] .eq, html[dir=rtl] .stat .v, html[dir=rtl] .barrow .v, html[dir=rtl] .proc, html[dir=rtl] #count { direction: ltr; unicode-bidi: isolate; }
+html[dir=rtl] .cover::before { transform: scaleX(-1); }
+html[dir=rtl] .cover .bar-side { left: auto; right: 0; }
+html[dir=rtl] .cv { left: auto; right: 6.6vw; }
+html[dir=rtl] .cv-chip { align-self: flex-start; }
+html[dir=rtl] .cv-team td { padding: 0 0 .75vh 2.6vw; }
+html[dir=rtl] .titlecard { left: auto; right: 6vw; }
+html[dir=rtl] .titlecard::before { transform: scaleX(-1); }
+html[dir=rtl] #chap { left: auto; right: 3vw; }
+html[dir=rtl] #logo { right: auto; left: 2.4vw; text-align: left; flex-direction: row-reverse; }
+html[dir=rtl] #count { right: auto; left: 2.4vw; }
+</style>
+<title>Colour-Sorting Conveyor</title>
+<meta name="author" content="Team Name">
+</head>
+<body>
+<canvas id="gl"></canvas>
+<div id="dim"></div>
+<div id="vignette"></div>
+<div id="labels"></div>
+<div id="chap"></div>
+<!-- deck: lang=en dir=ltr -->
+
+
+<div id="logo"><div>University Name<br>College of Engineering &middot; COURSE 0000</div></div>
+
+<!-- ======================= COVER ======================= -->
+<section class="slide cover" data-chapter="" data-cam="cover" data-shift="0.45" data-orbit="0.003"
+  data-notes="Good morning. This is our project: a small conveyor that sorts cans by their colour.">
+  <div class="bar-side"></div>
+  <div class="cv">
+    <div class="cv-uni a"><div><b>University Name</b><span>College of Engineering</span><span>Department Name</span></div></div>
+    <div class="cv-rule"></div>
+    <h1 class="a d1">Colour-Sorting<br>Conveyor</h1>
+    <p class="cv-sub a d2">A small belt that picks the red cans out of the line</p>
+    <div class="cv-chip a d3">COURSE 0000<i>&middot;</i>COURSE NAME</div>
+    <div class="cv-fill"></div>
+    <div class="cv-line a d4"></div>
+    <div class="cv-team a d4">
+      <div><h4>Submitted to</h4><p>Dr. Instructor Name</p></div>
+      <div><h4>Submitted by</h4>
+        <table>
+          <tr><td>First Student Name</td><td>000000001</td></tr>
+          <tr><td>Second Student Name</td><td>000000002</td></tr>
+          <tr><td>Third Student Name</td><td>000000003</td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="cv-place a d5">City<i>&middot;</i>Month Year</div>
+  </div>
+</section>
+
+<!-- ======================= THE WHOLE DEVICE ======================= -->
+<section class="slide" data-chapter="The device" data-cam="whole"
+  data-labels="Colour sensor,Servo arm,DC gear motor,Red bin,End bin"
+  data-notes="The device has three working parts: a motor that drives the belt, a colour sensor above it, and a servo arm. Red cans go to the side bin, all the others ride to the end.">
+  <div class="panel bottom">
+    <div class="kick a">The whole device</div>
+    <h2 class="a d1">One belt, one sensor, <em>one arm</em></h2>
+    <div class="body">
+      <p class="a d2">A DC gear motor turns the drive roller and the belt carries the cans at <span class="nb">8 cm/s</span>, one can every <span class="nb">1.5 s</span>. A colour sensor above the belt reads each can as it passes.</p>
+      <p class="a d3">A servo arm pushes the <b>red</b> cans into the side bin. Every other can rides on and drops into the bin at the end of the belt.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= THE COLOUR SENSOR ======================= -->
+<section class="slide" data-chapter="The device" data-cam="sensor" data-labels="Colour sensor,Feed hood,Controller"
+  data-notes="The sensor hangs from a bridge, close above the cans. It lights the can with white LEDs and measures the red, green and blue light that comes back. The controller compares the three values and decides whether the can is red.">
+  <div class="panel right">
+    <div class="kick a">Station 1 &middot; Reading</div>
+    <h2 class="a d1">The <em>colour sensor</em> reads every can</h2>
+    <p class="a d2">The sensor hangs from a bridge about <span class="nb">2 cm</span> above the cans. Two white LEDs light the can below, and the chip measures how much red, green and blue light comes back.</p>
+    <p class="a d3">The controller compares the three values. When red is clearly the strongest, it marks the can as red and starts a timer for the arm.</p>
+  </div>
+</section>
+
+<!-- ======================= THE SORTING ARM ======================= -->
+<section class="slide" data-chapter="The device" data-cam="arm" data-labels="Servo arm,Red bin"
+  data-notes="The arm is twelve centimetres downstream of the sensor. At eight centimetres a second the can needs one and a half seconds to get there, so the controller waits that long and then swings the servo. The arm is back before the next can arrives.">
+  <div class="panel left">
+    <div class="kick a">Station 2 &middot; Sorting</div>
+    <h2 class="a d1">The <em>servo arm</em> pushes red cans aside</h2>
+    <p class="a d2">The arm waits <span class="nb">12 cm</span> after the sensor. At <span class="nb">8 cm/s</span> a can needs <b class="nb">12 &divide; 8 = 1.5 s</b> to arrive, so the controller waits that long and then swings the servo.</p>
+    <p class="a d3">The arm sweeps about <span class="nb">70&deg;</span> across the belt, slides the can over the edge into the red bin, and returns before the next can comes.</p>
+  </div>
+</section>
+
+<!-- ======================= END ======================= -->
+<section class="slide" data-chapter="Thank you" data-cam="cover" data-shift="0.45" data-orbit="0.004"
+  data-notes="Thank you. We are happy to take your questions.">
+  <div class="titlecard">
+    <div class="k a">THANK YOU</div>
+    <h1 class="a d1">Any<br><span>questions?</span></h1>
+    <div class="sub a d2">A motor, a colour sensor and a servo arm: red cans to the side, the rest to the end.</div>
+  </div>
+</section>
+<div id="prog"></div><div id="count"></div><div id="hint">&larr; &rarr; to navigate &middot; F for full screen</div>
+<script>/* mini3d.js — a small self-contained WebGL 1 engine (no external libraries, works offline).
+   Meshes (primitives + binary STL), a scene graph, metal/roughness shading with one shadow-mapped key light,
+   a fill light, a procedural sky that is also the reflection environment, procedural surface detail
+   (concrete, water, cladding, print layers, lit windows), fog, transparent meshes and soft particles. */
+(function (root) {
+  "use strict";
+  // ------------------------------------------------------------------ math
+  const V = {
+    add: (a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]],
+    sub: (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]],
+    mul: (a, s) => [a[0] * s, a[1] * s, a[2] * s],
+    dot: (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2],
+    cross: (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]],
+    len: (a) => Math.hypot(a[0], a[1], a[2]),
+    norm: (a) => { const l = Math.hypot(a[0], a[1], a[2]) || 1; return [a[0] / l, a[1] / l, a[2] / l]; },
+    lerp: (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t],
+  };
+  const M = {
+    ident: () => new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]),
+    mul(a, b) { // column-major a*b
+      const o = new Float32Array(16);
+      for (let c = 0; c < 4; c++) for (let r = 0; r < 4; r++) {
+        let s = 0; for (let k = 0; k < 4; k++) s += a[k * 4 + r] * b[c * 4 + k]; o[c * 4 + r] = s;
+      }
+      return o;
+    },
+    persp(fovDeg, asp, n, f) {
+      const t = 1 / Math.tan(fovDeg * Math.PI / 360), o = new Float32Array(16);
+      o[0] = t / asp; o[5] = t; o[10] = (f + n) / (n - f); o[11] = -1; o[14] = 2 * f * n / (n - f); return o;
+    },
+    ortho(l, r, b, t, n, f) {
+      const o = new Float32Array(16);
+      o[0] = 2 / (r - l); o[5] = 2 / (t - b); o[10] = -2 / (f - n); o[12] = -(r + l) / (r - l); o[13] = -(t + b) / (t - b); o[14] = -(f + n) / (f - n); o[15] = 1; return o;
+    },
+    lookAt(e, c, up) {
+      const z = V.norm(V.sub(e, c)), x = V.norm(V.cross(up, z)), y = V.cross(z, x);
+      return new Float32Array([x[0], y[0], z[0], 0, x[1], y[1], z[1], 0, x[2], y[2], z[2], 0,
+        -V.dot(x, e), -V.dot(y, e), -V.dot(z, e), 1]);
+    },
+    trs(p, r, s) { // translate * Ry * Rx * Rz * scale (Euler radians)
+      const [cx, sx, cy, sy, cz, sz] = [Math.cos(r[0]), Math.sin(r[0]), Math.cos(r[1]), Math.sin(r[1]), Math.cos(r[2]), Math.sin(r[2])];
+      // R = Ry * Rx * Rz
+      const m00 = cy * cz + sy * sx * sz, m01 = -cy * sz + sy * sx * cz, m02 = sy * cx;
+      const m10 = cx * sz, m11 = cx * cz, m12 = -sx;
+      const m20 = -sy * cz + cy * sx * sz, m21 = sy * sz + cy * sx * cz, m22 = cy * cx;
+      const S = Array.isArray(s) ? s : [s, s, s];
+      return new Float32Array([m00 * S[0], m10 * S[0], m20 * S[0], 0, m01 * S[1], m11 * S[1], m21 * S[1], 0,
+        m02 * S[2], m12 * S[2], m22 * S[2], 0, p[0], p[1], p[2], 1]);
+    },
+    align(p, dir) { // rotation that takes +Y onto dir, then translation to p
+      const d = V.norm(dir), ax = V.cross([0, 1, 0], d), s = V.len(ax), c = d[1];
+      if (s < 1e-6) { const f = c < 0 ? -1 : 1; return new Float32Array([1, 0, 0, 0, 0, f, 0, 0, 0, 0, f, 0, p[0], p[1], p[2], 1]); }
+      const q = [ax[0] / s, ax[1] / s, ax[2] / s], C = 1 - c;
+      return new Float32Array([c + q[0] * q[0] * C, q[1] * q[0] * C + q[2] * s, q[2] * q[0] * C - q[1] * s, 0,
+        q[0] * q[1] * C - q[2] * s, c + q[1] * q[1] * C, q[2] * q[1] * C + q[0] * s, 0,
+        q[0] * q[2] * C + q[1] * s, q[1] * q[2] * C - q[0] * s, c + q[2] * q[2] * C, 0, p[0], p[1], p[2], 1]);
+    },
+    xf(m, p) { return [m[0] * p[0] + m[4] * p[1] + m[8] * p[2] + m[12], m[1] * p[0] + m[5] * p[1] + m[9] * p[2] + m[13], m[2] * p[0] + m[6] * p[1] + m[10] * p[2] + m[14]]; },
+  };
+  const ease = (t) => t < 0 ? 0 : t > 1 ? 1 : t * t * (3 - 2 * t);
+  const easeIO = (t) => t < 0 ? 0 : t > 1 ? 1 : (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+
+  // ------------------------------------------------------------------ geometry builders (non-indexed triangles)
+  function Geo() { this.p = []; this.n = []; }
+  Geo.prototype.tri = function (a, b, c, na, nb, nc) {
+    if (!na) { const n = V.norm(V.cross(V.sub(b, a), V.sub(c, a))); na = nb = nc = n; }
+    this.p.push(a[0], a[1], a[2], b[0], b[1], b[2], c[0], c[1], c[2]);
+    this.n.push(na[0], na[1], na[2], nb[0], nb[1], nb[2], nc[0], nc[1], nc[2]);
+  };
+  Geo.prototype.quad = function (a, b, c, d, na, nb, nc, nd) { this.tri(a, b, c, na, nb, nc); this.tri(a, c, d, na, nc, nd); };
+  Geo.prototype.merge = function (g, m) {
+    const P = g.p, N = g.n, p = this.p, n = this.n;
+    if (!m) { for (let i = 0; i < P.length; i++) { p.push(P[i]); n.push(N[i]); } return this; }
+    for (let i = 0; i < P.length; i += 3) {
+      const x = P[i], y = P[i + 1], z = P[i + 2], a = N[i], b = N[i + 1], c = N[i + 2];
+      p.push(m[0] * x + m[4] * y + m[8] * z + m[12], m[1] * x + m[5] * y + m[9] * z + m[13], m[2] * x + m[6] * y + m[10] * z + m[14]);
+      const nx = m[0] * a + m[4] * b + m[8] * c, ny = m[1] * a + m[5] * b + m[9] * c, nz = m[2] * a + m[6] * b + m[10] * c, l = Math.hypot(nx, ny, nz) || 1;
+      n.push(nx / l, ny / l, nz / l);
+    }
+    return this;
+  };
+  const G = {
+    box(w, h, d, skip) { // skip: any of f(+z) b(-z) l(-x) r(+x) t(+y) d(-y) to leave a face open
+      const g = new Geo(), x = w / 2, y = h / 2, z = d / 2; skip = skip || "";
+      const P = [[-x, -y, z], [x, -y, z], [x, y, z], [-x, y, z], [-x, -y, -z], [x, -y, -z], [x, y, -z], [-x, y, -z]];
+      if (skip.indexOf("f") < 0) g.quad(P[0], P[1], P[2], P[3]);
+      if (skip.indexOf("b") < 0) g.quad(P[5], P[4], P[7], P[6]);
+      if (skip.indexOf("l") < 0) g.quad(P[4], P[0], P[3], P[7]);
+      if (skip.indexOf("r") < 0) g.quad(P[1], P[5], P[6], P[2]);
+      if (skip.indexOf("t") < 0) g.quad(P[3], P[2], P[6], P[7]);
+      if (skip.indexOf("d") < 0) g.quad(P[4], P[5], P[1], P[0]);
+      return g;
+    },
+    lathe(prof, seg, a0, a1) { // prof: [[r, y], ...] around Y; smooth normals along the profile ([r, y, 1] = hard edge)
+      const g = new Geo(); seg = seg || 48; a0 = a0 || 0; a1 = a1 == null ? Math.PI * 2 : a1;
+      const N = prof.length, pn = [];
+      for (let i = 0; i < N; i++) { // profile normals (2D), averaged at interior points
+        const a = prof[Math.max(0, i - 1)], b = prof[Math.min(N - 1, i + 1)];
+        let dr = b[0] - a[0], dy = b[1] - a[1]; const l = Math.hypot(dr, dy) || 1; pn.push([dy / l, -dr / l]);
+      }
+      for (let s = 0; s < seg; s++) {
+        const t0 = a0 + (a1 - a0) * s / seg, t1 = a0 + (a1 - a0) * (s + 1) / seg;
+        const c0 = Math.cos(t0), s0 = Math.sin(t0), c1 = Math.cos(t1), s1 = Math.sin(t1);
+        for (let i = 0; i < N - 1; i++) {
+          const [r0, y0] = prof[i], [r1, y1] = prof[i + 1];
+          if (r0 === r1 && y0 === y1) continue;
+          const sharp = prof[i].length > 2 || prof[i + 1].length > 2;
+          let n0 = pn[i], n1 = pn[i + 1];
+          if (sharp) { const dr = r1 - r0, dy = y1 - y0, l = Math.hypot(dr, dy) || 1; n0 = n1 = [dy / l, -dr / l]; }
+          const A = [r0 * c0, y0, r0 * s0], B = [r0 * c1, y0, r0 * s1], C = [r1 * c1, y1, r1 * s1], D = [r1 * c0, y1, r1 * s0];
+          const nA = [n0[0] * c0, n0[1], n0[0] * s0], nB = [n0[0] * c1, n0[1], n0[0] * s1], nC = [n1[0] * c1, n1[1], n1[0] * s1], nD = [n1[0] * c0, n1[1], n1[0] * s0];
+          g.quad(A, D, C, B, nA, nD, nC, nB);
+        }
+      }
+      return g;
+    },
+    cyl(r1, r2, h, seg, caps) {
+      const y = h / 2;
+      const prof = caps === false ? [[r1, -y, 1], [r2, y, 1]] : [[0, -y, 1], [r1, -y, 1], [r1, -y, 1], [r2, y, 1], [r2, y, 1], [0, y, 1]];
+      return G.lathe(prof, seg || 40);
+    },
+    tubeRing(R, r, h, seg, a0, a1) { return G.lathe([[r, -h / 2, 1], [R, -h / 2, 1], [R, -h / 2, 1], [R, h / 2, 1], [R, h / 2, 1], [r, h / 2, 1], [r, h / 2, 1], [r, -h / 2, 1]], seg || 48, a0, a1); },
+    sphere(r, seg) { const prof = []; const n = seg || 24; for (let i = 0; i <= n; i++) { const a = -Math.PI / 2 + Math.PI * i / n; prof.push([Math.cos(a) * r, Math.sin(a) * r]); } return G.lathe(prof, n * 2); },
+    torus(R, r, s1, s2) { const prof = []; const n = s2 || 16; for (let i = 0; i <= n; i++) { const a = Math.PI * 2 * i / n; prof.push([R + Math.cos(a) * r, Math.sin(a) * r]); } return G.lathe(prof, s1 || 48); },
+    tube(path, r, seg, caps) { // pipe along a polyline, parallel-transport frames; r may be a function of the point index
+      const g = new Geo(); seg = seg || 12; const N = path.length; if (N < 2) return g;
+      const rad = typeof r === "function" ? r : () => r;
+      const T = []; for (let i = 0; i < N; i++) T.push(V.norm(V.sub(path[Math.min(N - 1, i + 1)], path[Math.max(0, i - 1)])));
+      let up = Math.abs(T[0][1]) < 0.9 ? [0, 1, 0] : [1, 0, 0];
+      let nrm = V.norm(V.cross(T[0], up)); const rings = [];
+      for (let i = 0; i < N; i++) {
+        if (i > 0) { const b = V.cross(T[i - 1], T[i]); if (V.len(b) > 1e-6) { const ax = V.norm(b), ang = Math.acos(Math.max(-1, Math.min(1, V.dot(T[i - 1], T[i])))); nrm = rot(nrm, ax, ang); } }
+        const bin = V.cross(T[i], nrm); const ring = [], rr = rad(i);
+        for (let k = 0; k <= seg; k++) { const a = Math.PI * 2 * k / seg; const d = V.add(V.mul(nrm, Math.cos(a)), V.mul(bin, Math.sin(a))); ring.push([V.add(path[i], V.mul(d, rr)), d]); }
+        rings.push(ring);
+      }
+      for (let i = 0; i < N - 1; i++) for (let k = 0; k < seg; k++) {
+        const a = rings[i][k], b = rings[i][k + 1], c = rings[i + 1][k + 1], d = rings[i + 1][k];
+        g.quad(a[0], b[0], c[0], d[0], a[1], b[1], c[1], d[1]);
+      }
+      if (caps) for (const e of [0, N - 1]) { const c = path[e], n = V.mul(T[e], e ? 1 : -1); for (let k = 0; k < seg; k++) g.tri(c, rings[e][k][0], rings[e][k + 1][0], n, n, n); }
+      return g;
+    },
+    stl(bytes) { // binary STL ArrayBuffer -> Geo (flat normals recomputed)
+      const dv = new DataView(bytes), n = dv.getUint32(80, true), g = new Geo();
+      g.p = new Array(n * 9); g.n = new Array(n * 9);
+      for (let i = 0; i < n; i++) {
+        const o = 84 + i * 50 + 12; const P = [];
+        for (let k = 0; k < 9; k++) P.push(dv.getFloat32(o + k * 4, true));
+        const a = [P[0], P[1], P[2]], b = [P[3], P[4], P[5]], c = [P[6], P[7], P[8]];
+        const nn = V.norm(V.cross(V.sub(b, a), V.sub(c, a)));
+        for (let k = 0; k < 9; k++) { g.p[i * 9 + k] = P[k]; g.n[i * 9 + k] = nn[k % 3]; }
+      }
+      return g;
+    },
+    bounds(g) { const mn = [1e9, 1e9, 1e9], mx = [-1e9, -1e9, -1e9]; for (let i = 0; i < g.p.length; i += 3) for (let k = 0; k < 3; k++) { mn[k] = Math.min(mn[k], g.p[i + k]); mx[k] = Math.max(mx[k], g.p[i + k]); } return { mn, mx, c: V.mul(V.add(mn, mx), 0.5), size: V.sub(mx, mn) }; },
+    xform(g, m) { return new Geo().merge(g, m); },
+  };
+  function rot(v, ax, a) { const c = Math.cos(a), s = Math.sin(a); return V.add(V.add(V.mul(v, c), V.mul(V.cross(ax, v), s)), V.mul(ax, V.dot(ax, v) * (1 - c))); }
+  function b64(s) { const bin = atob(s), u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u.buffer; }
+
+  // ------------------------------------------------------------------ shaders
+  const SKY = `
+    uniform vec3 uZen; uniform vec3 uHor; uniform vec3 uGlow; uniform vec3 uGlowDir; uniform vec3 uGndC; uniform float uStudio;
+    vec3 env(vec3 d){
+      float h = d.y;
+      vec3 c = mix(uHor, uZen, pow(clamp(h, 0.0, 1.0), 0.5));
+      float az = max(dot(normalize(d.xz + vec2(1e-4)), uGlowDir.xz), 0.0);
+      c += uGlow * exp(-abs(h) * 7.0) * (0.22 + 0.78 * az * az * az);
+      if (h < 0.0) c = mix(c, uGndC, clamp(-h * 5.0, 0.0, 1.0));
+      if (uStudio > 0.5) {
+        float bx = smoothstep(0.5, 0.66, d.y) * (1.0 - smoothstep(0.3, 0.5, abs(d.x - 0.15))) * (1.0 - smoothstep(0.45, 0.7, abs(d.z)));
+        c += vec3(1.7, 1.62, 1.5) * bx;
+        float st = (1.0 - smoothstep(0.05, 0.14, abs(d.y - 0.22))) * step(0.0, -d.x) * (1.0 - smoothstep(0.5, 0.85, abs(d.z)));
+        c += vec3(0.35, 0.45, 0.65) * st;
+      }
+      return c;
+    }
+    vec3 tone(vec3 c, float e){ c *= e; c = (c * (2.51 * c + 0.03)) / (c * (2.43 * c + 0.59) + 0.14); return pow(clamp(c, 0.0, 1.0), vec3(0.4545)); }`;
+  const NOISE = `
+    float hash(vec3 p){ p = fract(p * 0.3183099 + vec3(0.71, 0.113, 0.419)); p *= 17.0; return fract(p.x * p.y * p.z * (p.x + p.y + p.z)); }
+    float vnoise(vec3 x){ vec3 i = floor(x), f = fract(x); f = f * f * (3.0 - 2.0 * f);
+      return mix(mix(mix(hash(i), hash(i + vec3(1,0,0)), f.x), mix(hash(i + vec3(0,1,0)), hash(i + vec3(1,1,0)), f.x), f.y),
+                 mix(mix(hash(i + vec3(0,0,1)), hash(i + vec3(1,0,1)), f.x), mix(hash(i + vec3(0,1,1)), hash(i + vec3(1,1,1)), f.x), f.y), f.z); }
+    float fbm(vec3 p){ return 0.6 * vnoise(p) + 0.3 * vnoise(p * 2.13 + 7.1) + 0.1 * vnoise(p * 4.7 + 3.3); }`;
+  const VS = `attribute vec3 aP; attribute vec3 aN; uniform mat4 uM; uniform mat4 uVP; varying vec3 vN; varying vec3 vW; varying vec3 vO;
+    void main(){ vec4 w = uM * vec4(aP, 1.0); vW = w.xyz; vO = aP; vN = mat3(uM) * aN; gl_Position = uVP * w; }`;
+  const FS = `precision highp float; varying vec3 vN; varying vec3 vW; varying vec3 vO;
+    uniform vec3 uColor; uniform vec3 uEmis; uniform float uAlpha; uniform float uMetal; uniform float uRough; uniform float uTex; uniform float uDim;
+    uniform vec2 uGrain; uniform vec4 uPar; uniform vec3 uCam; uniform vec4 uWave; uniform float uExpo;
+    uniform vec3 uL; uniform vec3 uLc; uniform vec3 uL2; uniform vec3 uL2c; uniform vec3 uSky; uniform vec3 uGnd;
+    uniform vec3 uFogC; uniform float uFogN; uniform float uFogF;
+    uniform mat4 uLVP; uniform sampler2D uSh; uniform float uShOn; uniform float uShTexel; uniform float uShWorld;
+    ${SKY} ${NOISE}
+    float unpack(vec4 c){ return dot(c, vec4(1.0, 1.0 / 255.0, 1.0 / 65025.0, 1.0 / 16581375.0)); }
+    float tap(vec2 uv, float z){ return step(z, unpack(texture2D(uSh, uv))); }
+    float shadow(vec3 wp){
+      vec4 s = uLVP * vec4(wp, 1.0); vec3 p = s.xyz * 0.5 + 0.5;
+      float edge = max(abs(p.x - 0.5), abs(p.y - 0.5));
+      if (edge > 0.5 || p.z > 1.0) return 1.0;
+      float z = p.z - 0.0012; float t = uShTexel;
+      float a = tap(p.xy, z) * 2.0 + tap(p.xy + vec2(t, t), z) + tap(p.xy + vec2(-t, t), z) + tap(p.xy + vec2(t, -t), z) + tap(p.xy + vec2(-t, -t), z)
+              + tap(p.xy + vec2(1.8 * t, 0.0), z) + tap(p.xy + vec2(-1.8 * t, 0.0), z) + tap(p.xy + vec2(0.0, 1.8 * t), z) + tap(p.xy + vec2(0.0, -1.8 * t), z);
+      return mix(a * 0.1, 1.0, smoothstep(0.42, 0.5, edge));
+    }
+    void main(){
+      vec3 N = normalize(vN); vec3 Vd = normalize(uCam - vW);
+      if (dot(N, Vd) < 0.0) N = -N;
+      vec3 alb = uColor * uColor; float rough = uRough; float metal = uMetal; vec3 emis = uEmis; float al = uAlpha;
+      if (uGrain.x > 0.0) { float g = fbm(vO * uGrain.y); alb *= 1.0 + (g - 0.5) * 2.0 * uGrain.x; rough = clamp(rough + (g - 0.5) * uGrain.x, 0.04, 1.0); }
+      int t = int(uTex + 0.5);
+      if (t == 1) { // cast concrete: pour lines and rain streaks
+        float ln = smoothstep(0.46, 0.5, abs(fract(vW.y / uPar.x) - 0.5)); alb *= 1.0 - 0.16 * ln;
+        float st = vnoise(vec3(vW.x * 1.7, vW.y * 0.12, vW.z * 1.7)); alb *= 0.8 + 0.34 * st;
+      } else if (t == 2) { // water
+        vec2 p = vW.xz; vec2 gr = vec2(0.0);
+        gr += vec2(0.8, 0.6) * cos(dot(p, vec2(0.8, 0.6)) * 0.9 + uWave.x) * 0.5;
+        gr += vec2(-0.5, 0.86) * cos(dot(p, vec2(-0.5, 0.86)) * 2.1 + uWave.y) * 0.32;
+        gr += vec2(0.2, -0.98) * cos(dot(p, vec2(0.2, -0.98)) * 4.3 - uWave.z) * 0.2;
+        gr += (vec2(vnoise(vec3(p * 1.4, uWave.w)), vnoise(vec3(p * 1.4 + 9.0, uWave.w))) - 0.5) * 0.9;
+        N = normalize(vec3(-gr.x * uPar.x, 1.0, -gr.y * uPar.x));
+      } else if (t == 3) { // ribbed sheet cladding
+        if (abs(N.y) < 0.5) { bool ax = abs(N.x) > abs(N.z); float ph = (ax ? vW.z : vW.x) * uPar.x;
+          N = normalize(N + (ax ? vec3(0.0, 0.0, 1.0) : vec3(1.0, 0.0, 0.0)) * cos(ph) * 0.32); alb *= 0.93 + 0.07 * sin(ph);
+          alb *= 1.0 - 0.22 * smoothstep(0.47, 0.5, abs(fract(vW.y / uPar.y) - 0.5)); }
+      } else if (t == 4) { // fused-filament print: layer lines across the build direction (object Y)
+        if (abs(N.y) < 0.94) { float ph = vO.y * uPar.x; N = normalize(N + vec3(0.0, cos(ph) * 0.13, 0.0)); alb *= 0.975 + 0.025 * sin(ph); }
+      } else if (t == 5) { // building wall with a grid of windows; uPar = (cell width, floor height, top of the windows, lit fraction)
+        if (abs(N.y) < 0.3 && vW.y < uPar.z) { bool ax = abs(N.x) > abs(N.z); float u = (ax ? vW.z : vW.x) / uPar.x; float v = vW.y / uPar.y;
+          vec2 f = fract(vec2(u, v)); vec2 id = floor(vec2(u, v));
+          float win = step(0.24, f.x) * step(f.x, 0.76) * step(0.32, f.y) * step(f.y, 0.78);
+          if (win > 0.5) { float h = hash(vec3(id, ax ? 3.0 : 7.0)); float h2 = hash(vec3(id.yx, 11.0));
+            alb = vec3(0.012, 0.014, 0.02); rough = 0.12;
+            if (h < uPar.w) emis += mix(vec3(1.0, 0.72, 0.36), vec3(0.85, 0.9, 1.0), step(0.86, h2)) * (0.55 + 0.6 * h2); } }
+      } else if (t == 6) { // gravel / asphalt
+        alb *= 0.86 + 0.28 * hash(floor(vW * 7.0)); alb *= 0.8 + 0.4 * vnoise(vW * 0.07);
+      } else if (t == 7) { // jointed concrete paving
+        vec2 j = abs(fract(vW.xz / uPar.x) - 0.5); alb *= 1.0 - 0.3 * smoothstep(0.485, 0.5, max(j.x, j.y)); alb *= 0.84 + 0.3 * vnoise(vW * 0.35);
+      }
+      float NdV = max(dot(N, Vd), 0.001);
+      vec3 F0 = mix(vec3(0.04), alb, metal); vec3 dif = alb * (1.0 - metal);
+      float sh = uShOn > 0.5 ? shadow(vW + N * uShWorld * 1.6) : 1.0;
+      vec3 c = vec3(0.0); float glint = 0.0;
+      { float NdL = max(dot(N, uL), 0.0); vec3 H = normalize(uL + Vd); float NdH = max(dot(N, H), 0.0), VdH = max(dot(Vd, H), 0.0);
+        float a = rough * rough, a2 = a * a; float d = NdH * NdH * (a2 - 1.0) + 1.0; float D = a2 / (3.14159 * d * d + 1e-5);
+        float k = (rough + 1.0) * (rough + 1.0) / 8.0; float Gv = 1.0 / ((NdL * (1.0 - k) + k) * (NdV * (1.0 - k) + k));
+        vec3 F = F0 + (1.0 - F0) * pow(1.0 - VdH, 5.0); vec3 sp = min(D * F * Gv * 0.25, vec3(6.0));
+        c += (dif + sp) * uLc * NdL * sh; glint = dot(sp, vec3(0.33)) * NdL * sh; }
+      { float NdL = max(dot(N, uL2), 0.0); vec3 H = normalize(uL2 + Vd);
+        c += dif * uL2c * NdL + F0 * uL2c * pow(max(dot(N, H), 0.0), mix(64.0, 6.0, rough)) * NdL * (1.0 - rough); }
+      vec3 amb = mix(uGnd, uSky, 0.5 + 0.5 * N.y);
+      c += dif * amb * mix(0.72, 1.0, sh);
+      vec3 Rv = reflect(-Vd, N); vec3 e = mix(env(Rv), amb * 1.3, rough * rough);
+      e += uLc * pow(max(dot(Rv, uL), 0.0), 9.0) * 0.2 * (1.0 - uStudio);
+      vec3 Fe = F0 + (max(vec3(1.0 - rough), F0) - F0) * pow(1.0 - NdV, 5.0);
+      c += e * Fe * mix(1.0, 0.45, rough) * mix(0.55, 1.0, sh);
+      c += emis; c *= uDim;
+      if (al < 1.0) al = clamp(al + dot(Fe, vec3(0.33)) * 0.5 + glint * 0.6, 0.0, 1.0);
+      float f = clamp((length(uCam - vW) - uFogN) / (uFogF - uFogN), 0.0, 1.0); f = f * f * (3.0 - 2.0 * f);
+      c = mix(c, uFogC, f);
+      gl_FragColor = vec4(tone(c, uExpo), al);
+    }`;
+  const DVS = `attribute vec3 aP; uniform mat4 uM; uniform mat4 uLVP; void main(){ gl_Position = uLVP * uM * vec4(aP, 1.0); }`;
+  const DFS = `precision highp float;
+    void main(){ float d = gl_FragCoord.z; vec4 e = fract(d * vec4(1.0, 255.0, 65025.0, 16581375.0)); e -= e.yzww * vec4(1.0 / 255.0, 1.0 / 255.0, 1.0 / 255.0, 0.0); gl_FragColor = e; }`;
+  const SVS = `attribute vec2 aQ; varying vec2 vQ; void main(){ vQ = aQ; gl_Position = vec4(aQ, 0.9999, 1.0); }`;
+  const SFS = `precision highp float; varying vec2 vQ; uniform vec3 uF; uniform vec3 uR; uniform vec3 uU; uniform float uTwk; uniform float uStars; uniform float uExpo; uniform float uShift;
+    ${SKY}
+    float hash(vec3 p){ p = fract(p * 0.3183099 + vec3(0.71, 0.113, 0.419)); p *= 17.0; return fract(p.x * p.y * p.z * (p.x + p.y + p.z)); }
+    void main(){
+      vec3 d = normalize(uF + uR * (vQ.x - uShift) + uU * vQ.y);
+      vec3 c = env(d);
+      if (uStars > 0.0 && d.y > 0.02) { vec3 q = d * 150.0; vec3 id = floor(q); float s = hash(id);
+        float pt = smoothstep(0.42, 0.0, length(fract(q) - 0.5));
+        c += vec3(0.85, 0.9, 1.0) * step(0.992, s) * pt * (0.55 + 0.45 * sin(uTwk + s * 900.0)) * smoothstep(0.02, 0.35, d.y) * uStars * (0.4 + 0.6 * fract(s * 57.0)); }
+      gl_FragColor = vec4(tone(c, uExpo), 1.0);
+    }`;
+  const PVS = `attribute vec3 aP; attribute vec4 aC; attribute float aS; uniform mat4 uVP; uniform float uH; varying vec4 vC;
+    void main(){ vec4 p = uVP * vec4(aP,1.0); gl_Position = p; gl_PointSize = aS * uH / max(p.w, 0.001); vC = aC; }`;
+  const PFS = `precision mediump float; varying vec4 vC; uniform float uSoft;
+    void main(){ vec2 q = gl_PointCoord * 2.0 - 1.0; float r = dot(q,q); if (r > 1.0) discard; float a = mix(1.0 - smoothstep(0.6, 1.0, r), exp(-r * 2.5), uSoft); gl_FragColor = vec4(vC.rgb, vC.a * a); }`;
+
+  // ------------------------------------------------------------------ renderer
+  function Renderer(canvas, opts) {
+    opts = opts || {};
+    const gl = canvas.getContext("webgl", { antialias: true, alpha: false, preserveDrawingBuffer: !!opts.preserve, premultipliedAlpha: false, powerPreference: "high-performance" });
+    if (!gl) throw new Error("WebGL not available");
+    this.gl = gl; this.canvas = canvas; this.scale = 1; this.time = 0; this.wave = [0, 0, 0, 0]; this.twk = 0; // phases of the water waves and of the star twinkle
+    const sh = (src, t) => { const s = gl.createShader(t); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; };
+    const prog = (v, f) => { const p = gl.createProgram(); gl.attachShader(p, sh(v, gl.VERTEX_SHADER)); gl.attachShader(p, sh(f, gl.FRAGMENT_SHADER)); gl.bindAttribLocation(p, 0, "aP"); gl.linkProgram(p); if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p)); return p; };
+    const U = (p, names) => { const o = {}; names.forEach((n) => (o[n] = gl.getUniformLocation(p, n))); return o; };
+    const skyU = ["uZen", "uHor", "uGlow", "uGlowDir", "uGndC", "uStudio", "uExpo"];
+    this.P = prog(VS, FS); this.PD = prog(DVS, DFS); this.PS = prog(SVS, SFS); this.PP = prog(PVS, PFS);
+    this.u = U(this.P, ["uM", "uVP", "uColor", "uEmis", "uAlpha", "uMetal", "uRough", "uTex", "uDim", "uGrain", "uPar", "uCam", "uWave", "uL", "uLc", "uL2", "uL2c", "uSky", "uGnd",
+      "uFogC", "uFogN", "uFogF", "uLVP", "uSh", "uShOn", "uShTexel", "uShWorld"].concat(skyU));
+    this.du = U(this.PD, ["uM", "uLVP"]);
+    this.su = U(this.PS, ["uF", "uR", "uU", "uTwk", "uStars", "uShift"].concat(skyU));
+    this.pu = U(this.PP, ["uVP", "uH", "uSoft"]);
+    this.aP = gl.getAttribLocation(this.P, "aP"); this.aN = gl.getAttribLocation(this.P, "aN");
+    this.paP = gl.getAttribLocation(this.PP, "aP"); this.paC = gl.getAttribLocation(this.PP, "aC"); this.paS = gl.getAttribLocation(this.PP, "aS");
+    this.quad = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, this.quad); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]), gl.STATIC_DRAW);
+    // shadow map: depth packed into an RGBA texture (works on every WebGL 1 device)
+    const size = Math.min(2048, gl.getParameter(gl.MAX_TEXTURE_SIZE), gl.getParameter(gl.MAX_RENDERBUFFER_SIZE));
+    this.shSize = size; this.shTex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, this.shTex);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, size, size, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    const rb = gl.createRenderbuffer(); gl.bindRenderbuffer(gl.RENDERBUFFER, rb); gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, size, size);
+    this.shFbo = gl.createFramebuffer(); gl.bindFramebuffer(gl.FRAMEBUFFER, this.shFbo);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.shTex, 0); gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, rb);
+    this.shOk = gl.checkFramebufferStatus(gl.FRAMEBUFFER) === gl.FRAMEBUFFER_COMPLETE; gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    this.env = { light: V.norm([0.45, 0.8, 0.35]), lightC: [2.2, 2.0, 1.7], light2: V.norm([-0.6, 0.3, -0.5]), light2C: [0.2, 0.25, 0.35],
+      sky: [0.1, 0.12, 0.18], gnd: [0.03, 0.03, 0.03], fogC: [0.02, 0.03, 0.06], fogN: 60, fogF: 400,
+      zen: [0.01, 0.015, 0.04], hor: [0.05, 0.07, 0.12], glow: [0, 0, 0], glowDir: [1, 0, 0], gndC: [0.02, 0.02, 0.025], studio: 0, stars: 0, expo: 1,
+      shadow: null /* {c: [x,y,z], r: radius} */ };
+    this.cam = { eye: [10, 8, 12], target: [0, 0, 0], fov: 40, near: 0.1, far: 1000, shift: 0 };
+  }
+  Renderer.prototype.mesh = function (g) {
+    const gl = this.gl, vb = gl.createBuffer(), nb = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vb); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(g.p), gl.STATIC_DRAW);
+    gl.bindBuffer(gl.ARRAY_BUFFER, nb); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(g.n), gl.STATIC_DRAW);
+    return { vb, nb, count: g.p.length / 3 };
+  };
+  Renderer.prototype.resize = function () {
+    const c = this.canvas, dpr = Math.min(window.devicePixelRatio || 1, 2) * this.scale;
+    const w = Math.max(2, Math.round(c.clientWidth * dpr)), h = Math.max(2, Math.round(c.clientHeight * dpr));
+    if (c.width !== w || c.height !== h) { c.width = w; c.height = h; }
+  };
+  Renderer.prototype.vp = function () {
+    const c = this.canvas, cam = this.cam, P = M.persp(cam.fov, c.width / c.height, cam.near, cam.far);
+    P[8] = -(cam.shift || 0); // lens shift: moves the picture sideways without changing the perspective
+    return M.mul(P, M.lookAt(cam.eye, cam.target, cam.up || [0, 1, 0]));
+  };
+  // node: {mesh, color, emis, alpha, metal, rough, tex, grain, par, dim, cast, pos, rot, scl, children, visible, matrix(optional fn)}
+  function node(o) { return Object.assign({ pos: [0, 0, 0], rot: [0, 0, 0], scl: 1, color: [0.7, 0.7, 0.7], emis: [0, 0, 0], alpha: 1, metal: 0, rough: 0.6, tex: 0, grain: [0, 1], par: [1, 1, 0, 0], dim: 1, cast: true, children: [], visible: true }, o || {}); }
+  Renderer.prototype.render = function (scene, particles) {
+    const gl = this.gl, e = this.env, u = this.u, c = this.canvas, cam = this.cam;
+    const opaque = [], trans = [];
+    const walk = (n, pm, pd) => {
+      if (!n.visible) return;
+      const m = M.mul(pm, n.matrix ? n.matrix(n) : M.trs(n.pos, n.rot, n.scl)), d = pd * n.dim;
+      if (n.mesh) (n.alpha < 1 ? trans : opaque).push([n, m, d]);
+      for (const ch of n.children) walk(ch, m, d);
+    };
+    walk(scene, M.ident(), 1);
+    // ---- pass 1: shadow depth from the key light
+    let LVP = M.ident(), shOn = 0, shWorld = 0;
+    if (this.shOk && e.shadow) {
+      const r = e.shadow.r, S = this.shSize, L = e.light, texel = 2 * r / S;
+      const view = M.lookAt(V.mul(L, 1), [0, 0, 0], Math.abs(L[1]) > 0.95 ? [1, 0, 0] : [0, 1, 0]);
+      const cl = M.xf(view, e.shadow.c); const sx = Math.round(cl[0] / texel) * texel, sy = Math.round(cl[1] / texel) * texel; // snap to texels: no shimmer
+      LVP = M.mul(M.ortho(sx - r, sx + r, sy - r, sy + r, -cl[2] - 2.6 * r, -cl[2] + 2.6 * r), view); shOn = 1; shWorld = texel;
+      gl.bindFramebuffer(gl.FRAMEBUFFER, this.shFbo); gl.viewport(0, 0, S, S); gl.clearColor(1, 1, 1, 1); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+      gl.enable(gl.DEPTH_TEST); gl.disable(gl.BLEND); gl.disable(gl.CULL_FACE);
+      gl.useProgram(this.PD); gl.uniformMatrix4fv(this.du.uLVP, false, LVP); gl.enableVertexAttribArray(0);
+      for (const [n, m] of opaque) { if (n.cast === false) continue; gl.uniformMatrix4fv(this.du.uM, false, m); gl.bindBuffer(gl.ARRAY_BUFFER, n.mesh.vb); gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0); gl.drawArrays(gl.TRIANGLES, 0, n.mesh.count); }
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    }
+    // ---- pass 2: sky, opaque, transparent
+    gl.viewport(0, 0, c.width, c.height); gl.clearColor(0, 0, 0, 1); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    const VP = this.vp(); this.VP = VP;
+    const sky = (uu) => { gl.uniform3fv(uu.uZen, e.zen); gl.uniform3fv(uu.uHor, e.hor); gl.uniform3fv(uu.uGlow, e.glow); gl.uniform3fv(uu.uGlowDir, V.norm([e.glowDir[0], 0, e.glowDir[2]])); gl.uniform3fv(uu.uGndC, e.gndC); gl.uniform1f(uu.uStudio, e.studio); gl.uniform1f(uu.uExpo, e.expo); };
+    { const F = V.norm(V.sub(cam.target, cam.eye)), Rt = V.norm(V.cross(F, cam.up || [0, 1, 0])), Up = V.cross(Rt, F), th = Math.tan(cam.fov * Math.PI / 360);
+      gl.disable(gl.DEPTH_TEST); gl.disable(gl.BLEND); gl.depthMask(false); gl.useProgram(this.PS); sky(this.su);
+      gl.uniform3fv(this.su.uF, F); gl.uniform3fv(this.su.uR, V.mul(Rt, th * c.width / c.height)); gl.uniform3fv(this.su.uU, V.mul(Up, th));
+      gl.uniform1f(this.su.uTwk, this.twk); gl.uniform1f(this.su.uStars, e.stars); gl.uniform1f(this.su.uShift, cam.shift || 0);
+      gl.bindBuffer(gl.ARRAY_BUFFER, this.quad); gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0); gl.drawArrays(gl.TRIANGLES, 0, 6);
+      gl.depthMask(true); }
+    gl.enable(gl.DEPTH_TEST); gl.disable(gl.CULL_FACE);
+    gl.useProgram(this.P); sky(u);
+    gl.uniformMatrix4fv(u.uVP, false, VP); gl.uniform3fv(u.uCam, cam.eye); gl.uniform4fv(u.uWave, this.wave);
+    gl.uniform3fv(u.uL, e.light); gl.uniform3fv(u.uLc, e.lightC); gl.uniform3fv(u.uL2, e.light2); gl.uniform3fv(u.uL2c, e.light2C);
+    gl.uniform3fv(u.uSky, e.sky); gl.uniform3fv(u.uGnd, e.gnd); gl.uniform3fv(u.uFogC, e.fogC); gl.uniform1f(u.uFogN, e.fogN); gl.uniform1f(u.uFogF, e.fogF);
+    gl.uniformMatrix4fv(u.uLVP, false, LVP); gl.uniform1f(u.uShOn, shOn); gl.uniform1f(u.uShTexel, 1 / this.shSize); gl.uniform1f(u.uShWorld, shWorld);
+    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, this.shTex); gl.uniform1i(u.uSh, 0);
+    gl.enableVertexAttribArray(this.aP); gl.enableVertexAttribArray(this.aN);
+    const draw = ([n, m, d]) => {
+      gl.uniformMatrix4fv(u.uM, false, m); gl.uniform3fv(u.uColor, n.color); gl.uniform3fv(u.uEmis, n.emis);
+      gl.uniform1f(u.uAlpha, n.alpha); gl.uniform1f(u.uMetal, n.metal); gl.uniform1f(u.uRough, n.rough); gl.uniform1f(u.uTex, n.tex); gl.uniform1f(u.uDim, d);
+      gl.uniform2fv(u.uGrain, n.grain); gl.uniform4fv(u.uPar, n.par);
+      gl.bindBuffer(gl.ARRAY_BUFFER, n.mesh.vb); gl.vertexAttribPointer(this.aP, 3, gl.FLOAT, false, 0, 0);
+      gl.bindBuffer(gl.ARRAY_BUFFER, n.mesh.nb); gl.vertexAttribPointer(this.aN, 3, gl.FLOAT, false, 0, 0);
+      gl.drawArrays(gl.TRIANGLES, 0, n.mesh.count);
+    };
+    gl.disable(gl.BLEND); opaque.forEach(draw);
+    if (trans.length) {
+      const eye = cam.eye;
+      trans.sort((a, b) => V.len(V.sub([b[1][12], b[1][13], b[1][14]], eye)) - V.len(V.sub([a[1][12], a[1][13], a[1][14]], eye)));
+      gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); gl.depthMask(false);
+      trans.forEach(draw); gl.depthMask(true);
+    }
+    gl.disableVertexAttribArray(this.aN);
+    this.drawn = opaque.length + trans.length;
+    if (particles) for (const ps of particles) this.drawParticles(ps);
+  };
+  // ------------------------------------------------------------------ particles
+  function Particles(r, max, opt) {
+    this.r = r; this.max = max; this.n = 0; this.opt = Object.assign({ additive: true, soft: 1 }, opt || {});
+    this.P = new Float32Array(max * 3); this.C = new Float32Array(max * 4); this.S = new Float32Array(max);
+    const gl = r.gl; this.bp = gl.createBuffer(); this.bc = gl.createBuffer(); this.bs = gl.createBuffer();
+  }
+  Particles.prototype.clear = function () { this.n = 0; };
+  Particles.prototype.add = function (p, c, s, bias) { // bias: pull the sprite toward the eye (same place on screen, but in front of the pipe wall)
+    if (this.n >= this.max) return; const i = this.n++;
+    let x = p[0], y = p[1], z = p[2];
+    if (bias) { const e = this.r.cam.eye, dx = e[0] - x, dy = e[1] - y, dz = e[2] - z, l = Math.hypot(dx, dy, dz) || 1, k = Math.min(bias, l * 0.5) / l; x += dx * k; y += dy * k; z += dz * k; }
+    this.P[i * 3] = x; this.P[i * 3 + 1] = y; this.P[i * 3 + 2] = z;
+    this.C[i * 4] = c[0]; this.C[i * 4 + 1] = c[1]; this.C[i * 4 + 2] = c[2]; this.C[i * 4 + 3] = c[3] == null ? 1 : c[3]; this.S[i] = s;
+  };
+  Renderer.prototype.drawParticles = function (ps) {
+    if (!ps.n) return; const gl = this.gl;
+    gl.useProgram(this.PP); gl.uniformMatrix4fv(this.pu.uVP, false, this.VP); gl.uniform1f(this.pu.uH, this.canvas.height * 0.5); gl.uniform1f(this.pu.uSoft, ps.opt.soft);
+    const up = (b, arr, loc, k) => { gl.bindBuffer(gl.ARRAY_BUFFER, b); gl.bufferData(gl.ARRAY_BUFFER, arr.subarray(0, ps.n * k), gl.DYNAMIC_DRAW); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, k, gl.FLOAT, false, 0, 0); };
+    up(ps.bp, ps.P, this.paP, 3); up(ps.bc, ps.C, this.paC, 4); up(ps.bs, ps.S, this.paS, 1);
+    gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, ps.opt.additive ? gl.ONE : gl.ONE_MINUS_SRC_ALPHA); gl.depthMask(false);
+    gl.drawArrays(gl.POINTS, 0, ps.n);
+    gl.depthMask(true); gl.disable(gl.BLEND);
+    gl.disableVertexAttribArray(this.paC); gl.disableVertexAttribArray(this.paS);
+    gl.useProgram(this.P);
+  };
+  // polyline helpers for flows
+  function Path(pts) { this.pts = pts; this.L = [0]; for (let i = 1; i < pts.length; i++) this.L.push(this.L[i - 1] + V.len(V.sub(pts[i], pts[i - 1]))); this.len = this.L[this.L.length - 1]; }
+  Path.prototype.at = function (t) { // t in [0,1]
+    const d = ((t % 1) + 1) % 1 * this.len; let i = 1; while (i < this.L.length - 1 && this.L[i] < d) i++;
+    const a = this.pts[i - 1], b = this.pts[i], s = (d - this.L[i - 1]) / ((this.L[i] - this.L[i - 1]) || 1); return V.lerp(a, b, s);
+  };
+  function smoothPath(pts, r, k) { // round the corners of a polyline with radius r (k samples per corner)
+    if (pts.length < 3) return pts; k = k || 6; const out = [pts[0]];
+    for (let i = 1; i < pts.length - 1; i++) {
+      const a = pts[i - 1], b = pts[i], c = pts[i + 1];
+      const d1 = V.norm(V.sub(a, b)), d2 = V.norm(V.sub(c, b));
+      const rr = Math.min(r, V.len(V.sub(a, b)) / 2, V.len(V.sub(c, b)) / 2);
+      const p1 = V.add(b, V.mul(d1, rr)), p2 = V.add(b, V.mul(d2, rr));
+      for (let j = 0; j <= k; j++) { const t = j / k; const q = V.add(V.add(V.mul(p1, (1 - t) * (1 - t)), V.mul(b, 2 * t * (1 - t))), V.mul(p2, t * t)); out.push(q); }
+    }
+    out.push(pts[pts.length - 1]); return out;
+  }
+  root.M3D = { V, M, G, Geo, Renderer, Particles, Path, node, ease, easeIO, b64, smoothPath, rot };
+})(typeof window !== "undefined" ? window : this);
+</script>
+<script>window.ASSETS = { img: {} };</script>
+<script></script>
+<script>/* stage.js: the reusable half of a 3D deck.
+   One world stands behind every slide, and a slide is a camera on it. What touches is measured (check), and every
+   motion can be made to repeat exactly (loop mode), so that a slide can be recorded as a looping video.
+   A deck's scene.js builds its world through window.STAGE; ctrl.js drives it through window.PRES3D.
+   Units: the ground is y = 0; make the subject of a slide 5 to 40 units across (near plane 0.3, shadows from 16 units). */
+(function () {
+  "use strict";
+  const { V, M, G, Geo, Renderer, Particles, Path, node, easeIO, smoothPath } = M3D;
+  const canvas = document.getElementById("gl");
+  const R = new Renderer(canvas, { preserve: true });
+  const TAU = Math.PI * 2, PI = Math.PI, FLY = 2.4;                 // FLY: seconds of a camera flight between two slides
+  const mesh = (g) => R.mesh(g);
+  const T3 = (x, y, z) => M.trs([x, y, z], [0, 0, 0], 1);
+  let seed = 11; const rs = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }; // repeatable: the same layout on every load
+  const rnd = (a, b) => a + rs() * (b - a);
+  const clone = (o) => JSON.parse(JSON.stringify(o));
+
+  // ======================================================== geometry helpers
+  function alongX(g) { return G.xform(g, M.trs([0, 0, 0], [0, 0, -PI / 2], 1)); } // lathe axis Y -> X
+  function alongZ(g) { return G.xform(g, M.trs([0, 0, 0], [PI / 2, 0, 0], 1)); }  // lathe axis Y -> Z
+  function strut(a, b, w) { return G.xform(G.box(w, V.len(V.sub(b, a)), w), M.align(V.mul(V.add(a, b), 0.5), V.sub(b, a))); }
+  function flangeGeo(r) { const g = G.cyl(r * 1.5, r * 1.5, 0.16, 24); for (let k = 0; k < 8; k++) { const a = TAU * k / 8; g.merge(G.cyl(r * 0.12, r * 0.12, 0.3, 6), T3(Math.cos(a) * r * 1.26, 0, Math.sin(a) * r * 1.26)); } return g; }
+  function collarGeo(r) { return G.cyl(r * 1.1, r * 1.1, 0.16, 20, false); }
+
+  // ======================================================== materials (add your own: STAGE.MAT.name = {...})
+  // colour is perceptual (squared in the shader). metal 0..1, rough 0.04..1. tex: 1 concrete, 2 water, 3 ribbed cladding,
+  // 4 3D-print layer lines, 5 wall with lit windows, 6 gravel, 7 jointed paving. grain: [strength, frequency] of surface noise.
+  const MAT = {
+    ground: { color: [0.15, 0.14, 0.13], rough: 0.96, tex: 6 },
+    sand: { color: [0.34, 0.285, 0.21], rough: 0.97, grain: [0.28, 0.4] },
+    apron: { color: [0.31, 0.31, 0.31], rough: 0.9, tex: 7, par: [9, 0, 0, 0] },
+    asphalt: { color: [0.13, 0.13, 0.14], rough: 0.86, tex: 6 },
+    paint: { color: [0.82, 0.82, 0.76], rough: 0.7 },
+    water: { color: [0.02, 0.06, 0.1], rough: 0.09, tex: 2, par: [0.1, 0, 0, 0], cast: false },
+    rock: { color: [0.27, 0.25, 0.23], rough: 0.96, grain: [0.5, 0.55] },
+    concrete: { color: [0.5, 0.49, 0.47], rough: 0.92, tex: 1, grain: [0.16, 0.5], par: [3.0, 0, 0, 0] },
+    steel: { color: [0.52, 0.54, 0.57], metal: 0.9, rough: 0.42, grain: [0.1, 1.4] },
+    flange: { color: [0.66, 0.67, 0.69], metal: 0.95, rough: 0.3 },
+    dark: { color: [0.17, 0.18, 0.2], metal: 0.6, rough: 0.48 },
+    cast: { color: [0.2, 0.28, 0.38], metal: 0.3, rough: 0.46, grain: [0.07, 2.6] },
+    shell: { color: [0.36, 0.42, 0.47], metal: 0.4, rough: 0.5, grain: [0.08, 1.2] },
+    chrome: { color: [0.82, 0.84, 0.87], metal: 1, rough: 0.16 },
+    brass: { color: [0.82, 0.62, 0.3], metal: 1, rough: 0.3 },
+    copper: { color: [0.78, 0.47, 0.3], metal: 1, rough: 0.34 },
+    alu: { color: [0.76, 0.78, 0.81], metal: 1, rough: 0.3 },
+    glass: { color: [0.62, 0.74, 0.86], alpha: 0.12, rough: 0.05, cast: false },
+    cladding: { color: [0.5, 0.56, 0.62], metal: 0.5, rough: 0.5, tex: 3, par: [9, 3.3, 0, 0] },
+    motor: { color: [0.14, 0.26, 0.42], metal: 0.25, rough: 0.42 },
+    pWater: { color: [0.17, 0.29, 0.44], metal: 0.25, rough: 0.4 },
+    pHot: { color: [0.5, 0.17, 0.13], metal: 0.25, rough: 0.4 },
+    pWarm: { color: [0.6, 0.33, 0.15], metal: 0.25, rough: 0.4 },
+    pCool: { color: [0.17, 0.35, 0.32], metal: 0.25, rough: 0.4 },
+    yellow: { color: [0.86, 0.66, 0.1], rough: 0.5 },
+    red: { color: [0.72, 0.13, 0.1], rough: 0.6 },
+    white: { color: [0.87, 0.87, 0.85], rough: 0.7 },
+    rubber: { color: [0.05, 0.05, 0.055], rough: 0.85 },
+    pcb: { color: [0.05, 0.27, 0.16], rough: 0.4 },
+    cell: { color: [0.03, 0.05, 0.13], metal: 0.6, rough: 0.14 },
+    lampOn: { color: [0.9, 0.85, 0.7], emis: [3.2, 2.5, 1.5], cast: false },
+    wire: { color: [0.3, 0.3, 0.32], metal: 0.9, rough: 0.4, cast: false },
+    trunk: { color: [0.34, 0.26, 0.18], rough: 0.96, grain: [0.35, 2.2] },
+    frond: { color: [0.14, 0.27, 0.13], rough: 0.6 },
+    floor: { color: [0.05, 0.055, 0.07], metal: 0.5, rough: 0.3 },
+    plinth: { color: [0.12, 0.13, 0.16], metal: 0.6, rough: 0.34 },
+    trim: { color: [0.7, 0.55, 0.25], metal: 1, rough: 0.3, emis: [0.4, 0.28, 0.09], cast: false },
+  };
+  const plastic = (c, layer) => ({ color: c, rough: 0.46, tex: 4, par: [TAU / (layer || 0.62), 0, 0, 0] }); // a 3D-printed part: layer lines across Y
+
+  // ======================================================== environments (a scene picks one, or a changed copy)
+  const ENV = {
+    dusk: { light: V.norm([-0.42, 0.6, 0.62]), lightC: [1.75, 1.42, 1.05], light2: V.norm([0.6, 0.35, -0.55]), light2C: [0.12, 0.19, 0.36], sky: [0.07, 0.1, 0.18], gnd: [0.03, 0.027, 0.025],
+      zen: [0.01, 0.018, 0.055], hor: [0.085, 0.115, 0.21], glow: [0.8, 0.32, 0.11], glowDir: [0.85, 0, -0.5], gndC: [0.12, 0.1, 0.085], fogC: [0.07, 0.09, 0.155], fogN: 110, fogF: 560, studio: 0, stars: 1, expo: 1.0 },
+    studio: { light: V.norm([0.3, 0.9, 0.5]), lightC: [2.5, 2.35, 2.1], light2: V.norm([-0.7, 0.3, -0.4]), light2C: [0.3, 0.4, 0.62], sky: [0.16, 0.17, 0.21], gnd: [0.05, 0.05, 0.06],
+      zen: [0.012, 0.014, 0.022], hor: [0.02, 0.024, 0.036], glow: [0, 0, 0], glowDir: [1, 0, 0], gndC: [0.01, 0.01, 0.014], fogC: [0.012, 0.014, 0.022], fogN: 40, fogF: 150, studio: 1, stars: 0, expo: 1.0 },
+  };
+
+  // ======================================================== interference registry (measure, do not eyeball)
+  const SOL = [], PIPES = [], ALLOW = new Set();
+  let cur = null, firstScene = null;                                // cur: the scene that is being built
+  const sBox = (name, mn, mx) => SOL.push({ name, t: 0, mn, mx, sc: cur });
+  const sCyl = (name, ax, c, r, h) => SOL.push({ name, t: 1, ax, c, r, h, sc: cur });
+  const allow = (a, b) => { ALLOW.add(a + "|" + b); ALLOW.add(b + "|" + a); };
+  function sdf(s, p) {
+    if (s.t === 0) { const q = [0, 1, 2].map((k) => Math.abs(p[k] - (s.mn[k] + s.mx[k]) / 2) - (s.mx[k] - s.mn[k]) / 2);
+      return Math.hypot(Math.max(q[0], 0), Math.max(q[1], 0), Math.max(q[2], 0)) + Math.min(Math.max(q[0], q[1], q[2]), 0); }
+    const a = s.ax, d = [p[0] - s.c[0], p[1] - s.c[1], p[2] - s.c[2]], ax = Math.abs(d[a]) - s.h / 2, rad = Math.hypot(d[(a + 1) % 3], d[(a + 2) % 3]) - s.r;
+    return Math.min(Math.max(ax, rad), 0) + Math.hypot(Math.max(ax, 0), Math.max(rad, 0));
+  }
+  function segDist(p, a, b) { const ab = V.sub(b, a), t = Math.max(0, Math.min(1, V.dot(V.sub(p, a), ab) / (V.dot(ab, ab) || 1))); return V.len(V.sub(p, V.add(a, V.mul(ab, t)))); }
+  function samplesOf(s) { // points inside a solid, pulled in by 0.06 so that touching faces do not count
+    const out = [], e = 0.06;
+    if (s.t === 0) { for (let i = 0; i <= 6; i++) for (let j = 0; j <= 6; j++) for (let k = 0; k <= 6; k++) out.push([s.mn[0] + e + (s.mx[0] - s.mn[0] - 2 * e) * i / 6, s.mn[1] + e + (s.mx[1] - s.mn[1] - 2 * e) * j / 6, s.mn[2] + e + (s.mx[2] - s.mn[2] - 2 * e) * k / 6]); }
+    else { for (let i = 0; i <= 8; i++) for (let j = 0; j < 16; j++) for (let k = 0; k <= 3; k++) { const p = [0, 0, 0], an = TAU * j / 16, rr = (s.r - e) * k / 3;
+      p[s.ax] = s.c[s.ax] - s.h / 2 + e + (s.h - 2 * e) * i / 8; p[(s.ax + 1) % 3] = s.c[(s.ax + 1) % 3] + Math.cos(an) * rr; p[(s.ax + 2) % 3] = s.c[(s.ax + 2) % 3] + Math.sin(an) * rr; out.push(p); } }
+    return out;
+  }
+  // every pipe against every solid and every other pipe, every solid against every other solid, inside one scene
+  function check() {
+    const hits = [], eps = 0.05; let pairs = 0;
+    PIPES.forEach((P) => { const path = new Path(P.pts), n = Math.ceil(path.len / 0.2);
+      pairs += SOL.filter((s) => s.sc === P.sc).length + PIPES.filter((Q) => Q.sc === P.sc && Q.name > P.name).length;
+      for (let i = 0; i <= n; i++) { const d = path.len * i / n, p = path.at(Math.min(0.99999, i / n));
+        for (const s of SOL) { if (s.sc !== P.sc) continue; const pen = P.r - sdf(s, p); if (pen < eps) continue;
+          if ((P.a0.includes(s.name) && d < P.end) || (P.a1.includes(s.name) && path.len - d < P.end) || P.thru.includes(s.name)) continue;
+          hits.push(`pipe ${P.name} x ${s.name} @ ${p.map((v) => v.toFixed(1))} depth ${pen.toFixed(2)}`); break; }
+        for (const Q of PIPES) { if (Q === P || Q.sc !== P.sc || Q.name < P.name) continue; let dm = 1e9; for (let k = 1; k < Q.pts.length; k++) dm = Math.min(dm, segDist(p, Q.pts[k - 1], Q.pts[k]));
+          if (P.r + Q.r - dm < eps) continue; if (P.join.includes(Q.name) || Q.join.includes(P.name)) continue;
+          hits.push(`pipe ${P.name} x pipe ${Q.name} @ ${p.map((v) => v.toFixed(1))} depth ${(P.r + Q.r - dm).toFixed(2)}`); break; } } });
+    for (let i = 0; i < SOL.length; i++) for (let j = i + 1; j < SOL.length; j++) { const a = SOL[i], b = SOL[j]; if (a.sc !== b.sc) continue; pairs++; if (ALLOW.has(a.name + "|" + b.name)) continue;
+      let worst = 0, at = null; for (const p of samplesOf(a)) { const d = -sdf(b, p); if (d > worst) { worst = d; at = p; } } for (const p of samplesOf(b)) { const d = -sdf(a, p); if (d > worst) { worst = d; at = p; } }
+      if (worst > eps) hits.push(`solid ${a.name} x ${b.name} @ ${at.map((v) => v.toFixed(1))} depth ${worst.toFixed(2)}`); }
+    return { pipes: PIPES.length, solids: SOL.length, pairs, hits: [...new Set(hits)] };
+  }
+
+  // ======================================================== scenes and builders
+  function add(parent, o) { const n = node(o); parent.children.push(n); return n; }
+  function Batch(parent) { // merges everything of one material into a single mesh: thousands of boxes, a handful of draw calls
+    let geos = {}; const b = {
+      g(mat, geo, m) { if (!MAT[mat]) throw new Error("no material '" + mat + "'"); (geos[mat] || (geos[mat] = new Geo())).merge(geo, m); return b; },
+      // sol: a name registers the box / cylinder as a solid for check(). ax: 0 = along X, 1 = along Y, 2 = along Z
+      box(mat, cx, cy, cz, w, h, d, sol, skip) { b.g(mat, G.box(w, h, d, skip), T3(cx, cy, cz)); if (sol) sBox(sol, [cx - w / 2, cy - h / 2, cz - d / 2], [cx + w / 2, cy + h / 2, cz + d / 2]); return b; },
+      cyl(mat, ax, cx, cy, cz, r1, r2, len, seg, sol, caps) { let g = G.cyl(r1, r2, len, seg || 24, caps); if (ax === 0) g = alongX(g); else if (ax === 2) g = alongZ(g);
+        b.g(mat, g, T3(cx, cy, cz)); if (sol) sCyl(sol, ax, [cx, cy, cz], Math.max(r1, r2), len); return b; },
+      flush() { for (const k in geos) add(parent, Object.assign({ mesh: mesh(geos[k]) }, MAT[k])); geos = {}; },
+    }; return b;
+  }
+  const SCENES = {}, CAM = {}, LABELS = {};
+  // scene(name, {env, period, shadow, near, far}) creates the scene or returns to it; what is added next belongs to it.
+  // period: seconds of its looping video. shadow: (target, distance) => ({c, r}), the region that receives shadows.
+  function scene(name, opt) {
+    let s = SCENES[name];
+    if (!s) { s = SCENES[name] = { name, root: node(), env: ENV.dusk, period: 9, shadow: null, near: 0.3, far: 1600, flows: {}, journeys: {}, emitters: [], glows: [], frame: [], want: [], cam0: null }; s.B = Batch(s.root); if (!firstScene) firstScene = name; }
+    Object.assign(s, opt || {}); cur = s; return s;
+  }
+  // studio(name, opt): a dark room for a part shown alone: floor, a plinth edged in lit brass, a spotlight cone, shadows. Returns the scene;
+  // the plinth top is y = 1.2 (scene.top). opt.r: radius of a round plinth (2.9); opt.long: half-length of a long one with rounded ends, opt.width: its
+  // half-width (1.8); opt.plinth: false for the floor alone; opt.reach: radius that receives shadows (13); opt.period: seconds of its loop (12)
+  function studio(name, o) {
+    o = o || {}; const H = 1.2, s = scene(name, { env: ENV.studio, period: o.period || 12, shadow: () => ({ c: [0, 3, 0], r: o.reach || 13 }), top: o.plinth === false ? 0 : H }), B = s.B;
+    B.g("floor", G.cyl(80, 80, 0.4, 72), T3(0, -0.2, 0)); let cone = 6;
+    if (o.plinth === false) cone = o.reach ? o.reach * 0.6 : 6;
+    else if (o.long) { const L = o.long, w = o.width || 1.8, pl = new Geo(), ring = new Geo(); cone = L + 1;
+      pl.merge(G.box(2 * L, H, 2 * w), T3(0, H / 2, 0)); for (const z of [-1, 1]) ring.merge(G.box(2 * L, 0.08, 0.1), T3(0, H + 0.02, z * (w - 0.08)));
+      for (const e of [-1, 1]) { const a0 = e > 0 ? -PI / 2 : PI / 2, a1 = e > 0 ? PI / 2 : 1.5 * PI;
+        pl.merge(G.lathe([[0, 0, 1], [w, 0, 1], [w, 0, 1], [w, H, 1], [w, H, 1], [0, H, 1]], 24, a0, a1), T3(e * L, 0, 0)); ring.merge(G.tubeRing(w - 0.03, w - 0.13, 0.08, 24, a0, a1), T3(e * L, H + 0.02, 0)); }
+      B.g("plinth", pl); B.g("trim", ring); }
+    else { const r = o.r || 2.9; cone = r + 1.6; B.g("plinth", G.cyl(r - 0.3, r, H, 64), T3(0, H / 2, 0)); B.g("trim", G.tubeRing(r - 0.28, r - 0.4, 0.08, 64), T3(0, H + 0.02, 0)); }
+    part({ color: [1.0, 0.9, 0.7], alpha: 0.045, rough: 1, emis: [0.3, 0.26, 0.19], cast: false }, G.cyl(cone, 0.8, 14, 48, false), { pos: [0, 8.5, 0] });
+    return s;
+  }
+  const need = () => { if (!cur) throw new Error("call STAGE.scene(name) before building"); return cur; };
+  // a part that moves: its own node (everything static goes through the scene's batch instead)
+  function part(mat, geo, o) { const m = typeof mat === "string" ? MAT[mat] : mat; if (!m) throw new Error("no material '" + mat + "'"); return add((o && o.parent) || need().root, Object.assign({ mesh: mesh(geo) }, m, o, { parent: undefined })); }
+  // real geometry: a model packed by stl2models.py into <deck>/models.js. CAD is Z-up, the stage is Y-up.
+  // o.fit: scale so that the largest side is this long, centred on x and z, standing on y = 0. o.scale: plain factor. o.zup: false = keep axes
+  function stl(key, o) {
+    o = o || {}; const p = (window.MODELS3D || {})[key]; if (!p) throw new Error("no model '" + key + "' in models.js (run stl2models.py)");
+    const bin = atob(p.d), u8 = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+    const q = new Int16Array(u8.buffer), g = new Geo(), n = q.length / 9, c = p.c, h = p.h, zup = o.zup !== false;
+    g.p = new Array(q.length); g.n = new Array(q.length);
+    for (let t = 0; t < n; t++) { const P = [];
+      for (let k = 0; k < 3; k++) { const i = t * 9 + k * 3, x = c[0] + q[i] / 32767 * h[0], y = c[1] + q[i + 1] / 32767 * h[1], z = c[2] + q[i + 2] / 32767 * h[2]; P.push(zup ? [x, z, -y] : [x, y, z]); }
+      const nn = V.norm(V.cross(V.sub(P[1], P[0]), V.sub(P[2], P[0])));
+      for (let k = 0; k < 3; k++) for (let j = 0; j < 3; j++) { g.p[t * 9 + k * 3 + j] = P[k][j]; g.n[t * 9 + k * 3 + j] = nn[j]; } }
+    if (!o.fit && !o.scale) return g;
+    const b = G.bounds(g), s = o.fit ? o.fit / Math.max(b.size[0], b.size[1], b.size[2]) : o.scale;
+    return o.fit ? G.xform(g, M.mul(M.trs([0, 0, 0], [0, 0, 0], s), T3(-b.c[0], -b.mn[1], -b.c[2]))) : G.xform(g, M.trs([0, 0, 0], [0, 0, 0], s));
+  }
+  function cam(name, c) { CAM[name] = c; if (!need().cam0) cur.cam0 = name; return c; } // c: {eye, target, fov} or (slide data) => {eye, target, fov}
+  function label(key, p) { LABELS[key] = { p, sc: need() }; }                             // a one-character key is drawn as a numbered marker
+  function onFrame(fn) { need().frame.push(fn); }
+
+  // a pipe along a polyline with rounded bends, flanged ends and collars; registered for check().
+  // o: bend, f0 / f1: false = no flange at that end, a0 / a1: solids the ends may enter, thru: solids it may pass through,
+  //    join: pipes it may touch, support: spacing of automatic supports under its horizontal runs, collars: spacing (0 = none)
+  function pipe(name, pts, r, mat, o) {
+    o = o || {}; const B = need().B, sp = smoothPath(pts, o.bend == null ? 1.5 : o.bend, 8), N = pts.length;
+    B.g(mat, G.tube(sp, r, 14));
+    const fl = flangeGeo(r);
+    if (o.f0 !== false) B.g("flange", fl, M.align(pts[0], V.sub(pts[1], pts[0])));
+    if (o.f1 !== false) B.g("flange", fl, M.align(pts[N - 1], V.sub(pts[N - 2], pts[N - 1])));
+    const every = o.collars == null ? 9 : o.collars;
+    if (every) for (let i = 0; i < N - 1; i++) { const a = pts[i], b = pts[i + 1], L = V.len(V.sub(b, a)), n = Math.floor(L / every); for (let k = 1; k <= n; k++) B.g("flange", collarGeo(r), M.align(V.lerp(a, b, k / (n + 1)), V.sub(b, a))); }
+    const P = { name, pts: sp, raw: pts, r, a0: o.a0 || [], a1: o.a1 || [], thru: o.thru || [], join: o.join || [], end: o.end || 2.2, sc: cur };
+    PIPES.push(P); if (o.support) cur.want.push([P, o.support]);
+    return sp;
+  }
+  function supports(P, every) { // posts under the horizontal runs, only where nothing else stands
+    const raw = P.raw, B = P.sc.B;
+    for (let i = 0; i < raw.length - 1; i++) { const a = raw[i], b = raw[i + 1]; if (Math.abs(a[1] - b[1]) > 0.01) continue; const L = V.len(V.sub(b, a)), n = Math.floor(L / every);
+      for (let k = 0; k < n; k++) { const p = V.lerp(a, b, (k + 0.5) / n), top = p[1] - P.r - 0.1; let free = top > 0.2;
+        for (let y = 0.3; y < top && free; y += 0.3) { for (const s of SOL) if (s.sc === P.sc && sdf(s, [p[0], y, p[2]]) < 0.35) { free = false; break; }
+          for (const Q of PIPES) { if (Q === P || Q.sc !== P.sc || !free) continue; for (let j = 1; j < Q.pts.length; j++) if (segDist([p[0], y, p[2]], Q.pts[j - 1], Q.pts[j]) < Q.r + 0.3) { free = false; break; } } }
+        if (!free) continue;
+        if (top < 0.9) B.box("concrete", p[0], (top + 0.06) / 2, p[2], 0.6, top - 0.06, 0.6);
+        else { B.box("steel", p[0], (top + 0.06) / 2, p[2], 0.26, top - 0.06, 0.26); B.box("steel", p[0], 0.1, p[2], 0.7, 0.08, 0.7); B.box("steel", p[0], top + 0.05, p[2], P.r * 1.6, 0.1, P.r * 1.6); } } }
+  }
+  function rail(pts, y, mat) { // handrail along a polyline [x, z] on a floor at height y
+    const B = need().B; mat = mat || "yellow";
+    for (let i = 0; i < pts.length - 1; i++) { const a = pts[i], b = pts[i + 1], L = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.max(1, Math.round(L / 1.7));
+      for (let k = 0; k <= n; k++) { const x = a[0] + (b[0] - a[0]) * k / n, z = a[1] + (b[1] - a[1]) * k / n; B.box(mat, x, y + 0.55, z, 0.08, 1.1, 0.08); }
+      for (const h of [1.08, 0.58]) B.g(mat, strut([a[0], y + h, a[1]], [b[0], y + h, b[1]], 0.07)); }
+  }
+
+  // ======================================================== what moves
+  // flow: glowing pulses that travel along a path (give it the points that pipe() returned). v: units per second,
+  // bias: how far the sprites are pulled toward the eye so that they show in front of the pipe wall, dens: pulses per unit.
+  // o: size, alpha, on: (c) => 0..1 strength, hero: colour of the hero drop on this path
+  function flow(name, pts, col, v, bias, dens, o) {
+    const path = new Path(pts), f = Object.assign({ path, col, v, bias: bias == null ? 0.7 : bias, n: Math.max(3, Math.round(path.len * (dens || 0.4))), p0: rs(), size: 0.62, alpha: 0.7 }, o || {});
+    f.phase = f.p0; need().flows[name] = f; return f;
+  }
+  // journey: the route of the hero drop on a slide (data-hero="key"): [[flow name, from 0..1, to 0..1], ...]
+  function journey(key, segs, o) { need().journeys[key] = Object.assign({ segs, speed: 0.11, size: 1 }, o || {}); } // size: 1 suits pipes of radius 0.3 to 0.6; take 0.3 on a bench-top device
+  // emitter: n sprites that each live `life` seconds and are then born again (smoke, flames, bubbles, sparks, rain).
+  // draw(t, q, c): t = age 0..1, q = four random numbers that stay fixed during one life; it adds the sprite itself (STAGE.PF / PS).
+  function emitter(n, life, draw) {
+    const e = { n, life, draw, q: [] };
+    for (let i = 0; i < n; i++) { const t0 = rs(); e.q.push({ t0, t: t0, c: 0, rows: Array.from({ length: 16 }, () => [rs(), rs(), rs(), rs()]) }); }
+    need().emitters.push(e); return e;
+  }
+  // glow: a soft light sprite at a point. on: (c) => 0..1
+  function glow(p, col, size, on) { need().glows.push({ p, c: col, s: size, on }); }
+
+  const PF = new Particles(R, 9000, { additive: true, soft: 1 });   // light: flows, flames, lamps
+  const PS = new Particles(R, 2600, { additive: false, soft: 1 });  // matter: smoke, steam, dust
+  const PH = new Particles(R, 60, { additive: true, soft: 1 });     // the hero drop
+
+  // ======================================================== state driven by the slides
+  const S = { scene: null, cam: null, camFrom: null, camT: 1, shift: 0, shiftFrom: 0, dim: 0, orbit: 0, hero: null, heroT: 0, labels: [], d: {}, cut: false, period: 9, t0: 0 };
+  let curCam = null, curShift = 0, started = false;
+  const labelEls = {}, LSTATE = {};
+  const camOf = (name, d) => { const c = CAM[name]; return typeof c === "function" ? c(d || {}) : c; };
+  function setSlide(cfg) {
+    const name = cfg.scene || firstScene, sc = SCENES[name];
+    if (!sc) throw new Error("slide asks for scene '" + name + "'; scene.js defines: " + Object.keys(SCENES).join(", "));
+    const cname = cfg.cam || sc.cam0;
+    if (!CAM[cname]) throw new Error("slide asks for camera '" + cname + "'; scene.js defines: " + Object.keys(CAM).join(", "));
+    const to = camOf(cname, cfg.d), changed = S.scene !== name;
+    S.scene = name; S.cam = to; S.period = sc.period; S.d = cfg.d || {};
+    // a new scene has no meaningful "previous view": arrive with a short push-in instead of a flight across nothing
+    S.camFrom = !curCam || changed ? { eye: V.add(to.target, V.mul(V.sub(to.eye, to.target), 1.3)), target: to.target, fov: to.fov } : clone(curCam);
+    S.camT = curCam ? 0 : 1; S.shiftFrom = changed ? (cfg.shift || 0) : curShift;
+    S.hero = cfg.hero || null; S.heroT = cfg.cut ? 0.35 : 0; S.dim = cfg.dim || 0; S.shift = cfg.shift || 0; S.orbit = cfg.orbit || 0;
+    S.cut = !!cfg.cut; S.labels = cfg.labels || []; S.t0 = performance.now() / 1000;
+    S.labels.forEach((k) => { if (!LABELS[k]) console.error("slide asks for label '" + k + "' that scene.js does not define"); });
+    if (S.hero && !sc.journeys[S.hero]) console.error("slide asks for hero '" + S.hero + "' that scene '" + name + "' does not define");
+    if (cfg.cut) { S.camT = 1; S.camFrom = S.cam; S.shiftFrom = S.shift; }
+    if (!curCam || cfg.cut) { curCam = clone(S.cam); curShift = S.shift; }
+  }
+
+  // ======================================================== animation loop
+  let last = performance.now(), T = 0, slow = 0;
+  let LOOP = 0, paused = false; // loop mode (video capture): period in seconds; every motion then repeats exactly after one period
+  const ANG = {}, EASED = {}, STEP = {}; let FRAME = 0;
+  function frame(now, manual) {
+    if (paused && !manual) return;
+    const sc = SCENES[S.scene]; if (!sc) { if (!manual) requestAnimationFrame(frame); return; }
+    const raw = (now - last) / 1000, dt = Math.min(0.05, raw); last = now; T += dt; R.time = T; FRAME++;
+    const LP = LOOP, fr = (x) => x - Math.floor(x);
+    // Wq: an angular speed with a whole number of turns per loop (min: at least one turn, for slow turntables)
+    const Wq = (w, min) => { if (!LP) return w; let k = Math.round(w * LP / TAU); if (min && k === 0) k = w < 0 ? -1 : 1; return TAU * k / LP; };
+    R.wave = LP ? [Wq(1.1) * T, Wq(1.6) * T, Wq(2.2) * T, 0] : [T * 1.1, T * 1.6, T * 2.2, T * 0.5]; R.twk = Wq(1.3) * T;
+    // keep the frame rate on weak graphics: lower the internal resolution, never the scene
+    if (!S.cut && !LP && raw > 0.04 && raw < 0.5) { if (++slow > 45 && R.scale > 0.55) { R.scale *= 0.85; slow = 0; } } else slow = Math.max(0, slow - 1);
+    R.resize();
+    // camera: flight from the previous view, then a slow drift
+    if (S.camT < 1) S.camT = Math.min(1, S.camT + dt / FLY);
+    const k = easeIO(S.camT), a = S.camFrom || S.cam, b = S.cam;
+    let eye = V.lerp(a.eye, b.eye, k); const tgt = V.lerp(a.target, b.target, k);
+    const sway = LP ? 0.03 * Math.sin(TAU * T / LP) : Math.sin(T * 0.12) * 0.04 + (S.orbit ? Math.min(60, now / 1000 - S.t0) * S.orbit : 0);
+    const off = V.sub(eye, tgt), c = Math.cos(sway), s = Math.sin(sway);
+    eye = V.add(tgt, [off[0] * c - off[2] * s, off[1], off[0] * s + off[2] * c]);
+    curCam = { eye: V.lerp(a.eye, b.eye, k), target: tgt, fov: a.fov + (b.fov - a.fov) * k }; curShift = S.shiftFrom + (S.shift - S.shiftFrom) * k;
+    R.cam = { eye, target: tgt, fov: curCam.fov, near: sc.near, far: sc.far, shift: curShift };
+    const dist = V.len(V.sub(eye, tgt));
+    Object.assign(R.env, sc.env);
+    R.env.shadow = sc.shadow ? sc.shadow(tgt, dist) : { c: tgt, r: Math.pow(1.3, Math.round(Math.log(Math.max(16, Math.min(150, dist * 0.8))) / Math.log(1.3))) };
+    // the scene's own motion
+    const ctx = { T, dt, LP, S, d: S.d, Wq, fr, TAU,
+      num(key, def) { const v = S.d[key]; return v == null || v === "" ? def : +v; },                                    // a number from the slide: data-key="..."
+      // an angle that keeps turning at w rad/s (it grows without bound; the speed may change between slides). One key is one clock, however often it is read in a frame
+      spin(key, w, min) { if (LP) return Wq(w, min) * T; if (STEP[key] !== FRAME) { STEP[key] = FRAME; ANG[key] = (ANG[key] || 0) + dt * w; } return ANG[key]; },
+      cycle(key, seconds) { return fr(ctx.spin(key, TAU / seconds, true) / TAU); },                                       // 0..1 once every `seconds`: the phase of a conveyor, a stroke, a sequence
+      osc(w, ph) { return Math.sin(Wq(w, true) * T + (ph || 0)); },                                                      // -1..1
+      ease(key, target, rate) { const v = EASED[key] == null || S.cut ? target : EASED[key] + (target - EASED[key]) * Math.min(1, dt * (LP ? 4 : rate || 1.2)); return (EASED[key] = v); } }; // a value that follows the slide smoothly
+    PF.clear(); PS.clear(); PH.clear();
+    sc.frame.forEach((fn) => fn(ctx));
+    for (const key in sc.flows) { const f = sc.flows[key], on = f.on ? f.on(ctx) : 1, r = f.v / f.path.len;
+      if (LP) f.phase = f.p0 + T * Math.round(r * LP * f.n) / (LP * f.n); else f.phase += dt * r;
+      if (on > 0.02) for (let i = 0; i < f.n; i++) PF.add(f.path.at(fr(i / f.n + f.phase)), [f.col[0], f.col[1], f.col[2], f.alpha * on], f.size, f.bias); }
+    for (const e of sc.emitters) {
+      if (LP) { // a life longer than the loop: m sprites share one track, 1/m of a life apart; shorter: K whole lives per loop
+        const m = e.life > 1.5 * LP ? Math.round(e.life / LP) : 1, K = m > 1 ? 1 : Math.max(1, Math.round(LP / e.life)), groups = Math.floor(e.n / m);
+        for (let g = 0; g < groups; g++) { const base = e.q[g * m];
+          for (let j = 0; j < m; j++) { const u = base.t0 + j / m + T * K / (m * LP), row = m > 1 ? 0 : ((Math.floor(u) % K) + K) % K; e.draw(fr(u), base.rows[row % 16], ctx); } }
+      } else for (const q of e.q) { q.t += dt / e.life; if (q.t >= 1) { q.t -= Math.floor(q.t); q.c++; } e.draw(q.t, q.rows[q.c % 16], ctx); }
+    }
+    sc.glows.forEach((g) => { const kk = g.on ? g.on(ctx) : 1; if (kk > 0.02) PF.add(g.p, [g.c[0], g.c[1], g.c[2], 0.5 * kk], g.s, 0.3); });
+    const J = S.hero && sc.journeys[S.hero];
+    if (J) { S.heroT = LP ? fr(T / LP + 0.35) : (S.heroT + dt * J.speed) % 1; const segs = J.segs;
+      const L = segs.map((sg) => sc.flows[sg[0]].path.len * (sg[2] - sg[1])), tot = L.reduce((x, y) => x + y, 0); let d = S.heroT * tot, i = 0;
+      while (i < segs.length - 1 && d > L[i]) { d -= L[i]; i++; }
+      const sg = segs[i], f = sc.flows[sg[0]], t = sg[1] + (sg[2] - sg[1]) * (d / L[i]), p = f.path.at(Math.min(0.9999, t));
+      const col = f.hero || [0.5 + 0.5 * f.col[0], 0.5 + 0.5 * f.col[1], 0.5 + 0.5 * f.col[2]], bs = f.bias + 0.25;
+      const z = J.size; PH.add(p, [col[0], col[1], col[2], 1], 2.6 * z, bs); PH.add(p, [1, 1, 1, 0.95], 1.0 * z, bs);
+      for (let q = 1; q < 10; q++) { const tt = Math.max(sg[1], t - q * 0.9 * z / f.path.len); PH.add(f.path.at(Math.min(0.9999, tt)), [col[0], col[1], col[2], 0.5 * (1 - q / 10)], 1.7 * z * (1 - q / 12), bs); } }
+    R.render(sc.root, [PS, PF, PH]);
+    // labels: callouts on a leader, hidden when they would sit on the text panel, pushed apart when they would touch
+    const VP = R.VP, cw = canvas.clientWidth, ch = canvas.clientHeight, vis = [];
+    const pan = document.querySelector(".slide.on .panel"), pr = pan ? pan.getBoundingClientRect() : null, soft = document.documentElement.dir === "rtl" ? 0.08 : 0.2; // the faded edge of a side panel may carry a callout
+    for (const key in labelEls) {
+      const el = labelEls[key], L = LABELS[key], want = L.sc === sc && S.labels.includes(key);
+      if (!want) { el.style.opacity = 0; delete LSTATE[key]; continue; }
+      if (S.camT <= 0.7) { el.style.opacity = 0; LSTATE[key] = "flying"; continue; }
+      const p = L.p, x = VP[0] * p[0] + VP[4] * p[1] + VP[8] * p[2] + VP[12], y = VP[1] * p[0] + VP[5] * p[1] + VP[9] * p[2] + VP[13], w = VP[3] * p[0] + VP[7] * p[1] + VP[11] * p[2] + VP[15];
+      if (w <= 0) { el.style.opacity = 0; LSTATE[key] = "behind the camera"; continue; }
+      const sx = ((x / w) * 0.5 + 0.5) * cw, sy = (1 - ((y / w) * 0.5 + 0.5)) * ch, num = key.length === 1, hw = num ? ch * 0.022 : el.firstChild.offsetWidth / 2;
+      if (pr && sx + hw > pr.left + pr.width * (pan.classList.contains("right") ? soft : 0) && sx - hw < pr.right - pr.width * (pan.classList.contains("left") ? soft : 0) && sy > pr.top - ch * 0.02 && sy - ch * 0.07 < pr.bottom) { el.style.opacity = 0; LSTATE[key] = "under the text panel"; continue; }
+      if (sx < hw + 4 || sx > cw - hw - 4 || sy < ch * 0.1 || sy > ch * 0.97) { el.style.opacity = 0; LSTATE[key] = "off the screen"; continue; }
+      LSTATE[key] = "shown"; vis.push({ el, sx, sy, hw, num, lift: num ? 0 : ch * 0.05 });
+    }
+    vis.sort((p, q) => q.sy - p.sy);
+    for (let i = 0; i < vis.length; i++) for (let j = 0; j < i; j++) { const p = vis[i], q = vis[j]; if (p.num || q.num) continue;
+      if (Math.abs(p.sx - q.sx) < p.hw + q.hw + 6 && Math.abs((p.sy - p.lift) - (q.sy - q.lift)) < ch * 0.038) p.lift = Math.max(p.lift, q.lift + (p.sy - q.sy) + ch * 0.04); }
+    vis.forEach((p) => { p.el.style.opacity = 1; p.el.style.setProperty("--lift", p.lift + "px"); p.el.style.transform = `translate(${p.sx}px, ${p.sy}px)`; });
+    const dimEl = document.getElementById("dim"); if (dimEl) dimEl.style.opacity = S.dim;
+    if (!manual) requestAnimationFrame(frame);
+  }
+  function start() {
+    if (started) return; started = true;
+    for (const k in SCENES) { const s = SCENES[k]; cur = s; s.want.forEach(([P, every]) => supports(P, every)); s.B.flush(); } // supports last, when every solid and pipe is known
+    const root = document.getElementById("labels");
+    Object.keys(LABELS).forEach((k) => { const d = document.createElement("div"), num = k.length === 1; d.className = "lbl" + (num ? " num" : ""); d.innerHTML = num ? "<b></b>" : "<span></span><i></i>"; d.firstChild.textContent = k; root.appendChild(d); labelEls[k] = d; });
+    requestAnimationFrame(frame);
+  }
+  function tick(n, step) { for (let i = 0; i < n; i++) frame(last + (step || 16.7), true); } // advance the show by hand (tests, hidden tabs)
+  function bench(n) { const gl = R.gl, px = new Uint8Array(4), sc = SCENES[S.scene], t0 = performance.now(); for (let i = 0; i < n; i++) { R.render(sc.root, [PS, PF, PH]); gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px); } return (performance.now() - t0) / n; }
+
+  window.STAGE = { V, M, G, Geo, Path, node, smoothPath, R, mesh, TAU, PI, T3, rs, rnd, alongX, alongZ, strut, flangeGeo, collarGeo, MAT, plastic, ENV, FLY,
+    scene, studio, add, part, stl, Batch, sBox, sCyl, allow, check, pipe, rail, flow, journey, emitter, glow, label, cam, onFrame, PF, PS, PH, CAM, LABELS, SCENES, S, start };
+  window.PRES3D = { setSlide, CAM, S, check, bench, tick, R, setT: (t) => { T = t; },
+    labels: () => Object.assign({}, LSTATE),                                                                            // why each requested label is or is not on screen
+    info: () => ({ scenes: Object.keys(SCENES), cams: Object.keys(CAM), labels: Object.keys(LABELS), drawn: R.drawn }),
+    loop: (p) => { LOOP = p || 0; const was = paused; paused = !!p; if (was && !paused) requestAnimationFrame(frame); }, // loop mode also stops the free-running clock
+    renderAt: (t, dt) => { T = t - dt; frame(last + dt * 1000, true); } };                                              // draw the frame of time t, one step dt after the previous one
+})();
+</script>
+<script>/* scene.js: a bench-top conveyor that sorts cans by colour.
+   Feed hood -> belt (DC gear motor on the drive roller) -> colour sensor on a bridge -> servo arm that sweeps the red
+   cans into a side bin -> the rest ride on into the bin at the end of the belt.
+   One unit is 2 cm. One scene, in studio light. Every moving thing is a function of one phase (c.cycle), so it repeats.
+   The pattern for solid parts that travel: each can's place is computed from the phase, never stepped frame by frame,
+   and a can that has finished is hidden until its next turn. This deck was written from the skill's text alone, as its test. */
+(function () {
+  "use strict";
+  const { M, G, Geo, T3, TAU, PI, MAT, alongZ, part, add, pipe, flow, glow, label, cam, onFrame, sBox, sCyl, plastic } = STAGE;
+  const W = {};                                          // the parts that move
+
+  // ---------------------------------------------------------------- the deck's own materials
+  MAT.wood = { color: [0.62, 0.5, 0.33], rough: 0.85, grain: [0.22, 2.5] };
+  MAT.cable = { color: [0.08, 0.08, 0.09], rough: 0.7 };
+  MAT.beltMark = { color: [0.17, 0.17, 0.18], rough: 0.9, cast: false };
+  MAT.frame = { color: [0.6, 0.62, 0.65], metal: 0.25, rough: 0.5, grain: [0.05, 2] };   // brushed aluminium; a full metal goes black in the studio
+  MAT.canEnd = { color: [0.74, 0.75, 0.77], metal: 0.3, rough: 0.45 };
+  MAT.canRed = { color: [0.74, 0.1, 0.07], metal: 0.55, rough: 0.34 };
+  MAT.canBlue = { color: [0.1, 0.27, 0.6], metal: 0.55, rough: 0.34 };
+  MAT.canGreen = { color: [0.12, 0.46, 0.22], metal: 0.55, rough: 0.34 };
+  MAT.canGold = { color: [0.78, 0.6, 0.2], metal: 0.7, rough: 0.34 };
+  MAT.bin = plastic([0.62, 0.64, 0.66], 0.06);
+  MAT.armPrint = plastic([0.88, 0.62, 0.1], 0.05);
+  MAT.tagRed = { color: [0.78, 0.1, 0.07], rough: 0.5 };
+  MAT.tagGrey = { color: [0.2, 0.22, 0.26], rough: 0.5 };
+
+  // ================================================================ constants (units; 1 unit = 2 cm)
+  const Y0 = 1.5;                                        // top of the base board
+  const CYC = 9, NC = 6, VB = 4;                         // one cycle: 6 cans in 9 s; belt speed 4 units/s = 8 cm/s
+  const BW = 4.4, XR = 11.5;                             // belt width, roller axes at x = -XR and +XR
+  const RB = VB * CYC / (TAU * 7), BT = 0.1, RR = RB - BT; // belt radius on the rollers: exactly 7 roller turns a cycle
+  const YB = 5.2, YA = YB - RB;                          // top of the belt, roller axis
+  const ZP = BW / 2 + 0.25, ZE = BW / 2 + 0.4;           // side plates (0.3 thick), their outer face
+  const CR = 1.05, CH = 2.5, HH = CH / 2, YC = YB + HH;  // can radius, height; centre height of a can on the belt
+  const HX0 = -12.8, HX1 = -8, XS0 = -11.2;              // feed hood back and mouth; where a can starts, deep inside it
+  const XS = -3;                                         // colour sensor
+  const PX = 1.4, PZ = -2.75, PY = 7.05, LA = 6.4;       // servo shaft, height of the horn, arm length
+  const D0 = 1.6, THMAX = 1.2, TS = 0.55, TD = 0.1, TR = 0.45; // the swing starts when the can is D0 past the shaft
+  const RH = CR + 0.15;                                  // can radius + half the arm thickness
+  const CX = -5.5, CZ = 6.2;                             // controller board, in front of the conveyor
+  const YF = Y0 + 0.15, GRAV = 490;                      // floor of the bins; gravity, 9.8 m/s2 in these units
+  const HIDE = null;                                     // a can waiting for its next turn is not drawn
+  const SBX = [2.6, 9.0], SBZ = [ZE + 0.25, 8.0];        // side bin, inside
+  const EBX = [12.6, 17.6], EBZ = 2.8;                   // end bin, inside
+
+  // ================================================================ how a can leaves the belt
+  const sm = (u) => u <= 0 ? 0 : u >= 1 ? 1 : u * u * (3 - 2 * u);
+  // It leans over an edge (a pivot), lets go, falls, lands on its side and slides to rest.
+  // Returns at(t) -> [distance from the pivot, height of the centre, lean angle]; tTop: when it reaches the can below.
+  function tipFall(L, v0, acc, beta1, yPivot, slide) {
+    const dt = 1 / 480, tab = [], ext = (b) => HH * Math.abs(Math.cos(b)) + CR * Math.abs(Math.sin(b));
+    let beta = 0, w = v0 / L, tTop = -1;
+    while (beta < beta1) { tab.push([L * Math.sin(beta), yPivot + L * Math.cos(beta), beta]); w += acc * dt; beta += w * dt; }
+    let s = L * Math.sin(beta), y = yPivot + L * Math.cos(beta), vy = -L * w * Math.sin(beta); const vs = L * w * Math.cos(beta);
+    while (y - ext(beta) > YF) { if (tTop < 0 && y - ext(beta) < YF + 2 * CR + 0.05) tTop = tab.length * dt;
+      tab.push([s, y, beta]); vy -= GRAV * dt; s += vs * dt; y += vy * dt; beta = Math.min(PI / 2, beta + w * dt); }
+    const tLand = tab.length * dt, n = Math.round(0.12 / dt), b0 = beta, y0 = y;
+    for (let k = 1; k <= n; k++) { const u = k / n, e = u * (2 - u); tab.push([s + slide * e, y0 + (YF + CR - y0) * e, b0 + (PI / 2 - b0) * e]); }
+    const last = tab.length - 1;
+    return { tTop, tLand, rest: tab[last], at: (t) => { const k = Math.min(last, Math.max(0, t / dt)), i = Math.floor(k), f = k - i, a = tab[i], b = tab[Math.min(last, i + 1)];
+      return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f, a[2] + (b[2] - a[2]) * f]; } };
+  }
+  // the arm: angle against time since the swing began, and where it holds the can it touches (never inside it)
+  const armAt = (t) => t <= 0 ? 0 : t < TS ? THMAX * sm(t / TS) : t < TS + TD ? THMAX : THMAX * (1 - sm((t - TS - TD) / TR));
+  const pushZ = (t) => { const th = armAt(t), d = D0 + VB * t; return Math.max(0, PZ + (RH + d * Math.sin(th)) / Math.cos(th)); };
+  let T_EDGE = 0; while (pushZ(T_EDGE) < ZE) T_EDGE += 1 / 480;                      // the can's centre passes the edge of the frame
+  const V_EDGE = (pushZ(T_EDGE) - pushZ(T_EDGE - 1 / 480)) * 480, X_EDGE = PX + D0 + VB * T_EDGE;
+  const END = tipFall(RB + HH, VB, 12, 0.6, YA, 0.8);                                // over the end roller
+  const SIDE = tipFall(HH, V_EDGE, 12, 0.6, YB, 0.5);                                // over the side of the frame
+  const T_SENSE = (XS - XS0) / VB, T_PUSH = (PX + D0 - XS0) / VB, T_END = (XR - XS0) / VB;
+  const GAP = CYC * 2 / NC;                                                          // the next can for the same bin comes 3 s later
+  const REST_END = Math.min(GAP + END.tTop, CYC - T_END), REST_SIDE = GAP + SIDE.tTop;
+
+  // ================================================================ the scene
+  const sc = STAGE.scene("bench", { env: STAGE.ENV.studio, period: CYC, shadow: () => ({ c: [2, 3, 0.5], r: 26 }) }), B = sc.B;
+  B.g("floor", G.cyl(90, 90, 0.4, 72), T3(0, -0.2, 0));
+  B.box("plinth", 2, 0.6, 0.75, 42, 1.2, 24, "table"); B.box("trim", 2, 1.04, 0.75, 42.1, 0.1, 24.1);
+  B.box("wood", 2, Y0 - 0.15, 0.75, 34, 0.3, 17.5, "base");
+
+  // ---------------------------------------------------------------- frame: two side plates on four legs
+  for (const s of [-1, 1]) {
+    B.box("frame", -0.2, (YA - 0.9 + YB) / 2, s * ZP, 25.2, YB - YA + 0.9, 0.3, s > 0 ? "plateN" : "plateF");
+    for (const x of [-10, 10]) { B.box("frame", x, (Y0 + YA - 0.9) / 2, s * ZP, 0.5, YA - 0.9 - Y0, 0.5, "leg" + x + s); B.box("dark", x, Y0 + 0.05, s * ZP, 1.0, 0.1, 1.0); }
+    for (const x of [-XR, XR]) B.box("cast", x, YA, s * (ZE + 0.125), 1.0, 1.0, 0.25);                      // bearing blocks
+  }
+  for (const x of [-10, 10]) B.box("frame", x, 2.5, 0, 0.3, 0.3, 2 * ZP - 0.5);                               // ties between the legs
+  B.box("steel", 0, YA, 0, 2 * XR - 2 * RB - 0.3, 0.2, BW - 0.2);                                           // slider bed under the top run
+
+  // ---------------------------------------------------------------- belt: two runs and the wraps round the rollers
+  B.box("rubber", 0, YB - BT / 2, 0, 2 * XR, BT, BW); B.box("rubber", 0, YA - RB + BT / 2, 0, 2 * XR, BT, BW);
+  for (const x of [-XR, XR]) B.g("rubber", alongZ(G.tubeRing(RB, RR, BW, 28)), T3(x, YA, 0));
+  { const g = new Geo(); for (let k = 0; k < 8; k++) g.merge(G.box(0.12, 0.012, BW - 0.3), T3(XR - 24 + 3 * k, YB + 0.008, 0)); W.marks = part("beltMark", g, {}); } // marks printed on the belt, every 3 units
+  const roller = (drive) => { const g = new Geo().merge(alongZ(G.cyl(RR - 0.02, RR - 0.02, BW - 0.1, 24)));
+    const z0 = -(ZE + 0.5), z1 = drive ? ZE + 1.15 : ZE + 0.5; g.merge(alongZ(G.cyl(0.16, 0.16, z1 - z0, 14)), T3(0, 0, (z0 + z1) / 2));
+    g.merge(alongZ(G.cyl(0.3, 0.3, 0.25, 16)), T3(0, 0, z0 + 0.1)); g.merge(G.box(0.12, 0.14, 0.12), T3(0, 0.33, z0 + 0.1));           // collar and its set screw
+    if (drive) { g.merge(alongZ(G.cyl(0.36, 0.36, 0.8, 18)), T3(0, 0, ZE + 0.75)); g.merge(G.box(0.14, 0.16, 0.5), T3(0, 0.38, ZE + 0.75)); } // coupling to the gearbox
+    else { g.merge(alongZ(G.cyl(0.3, 0.3, 0.25, 16)), T3(0, 0, z1 - 0.1)); g.merge(G.box(0.12, 0.14, 0.12), T3(0, 0.33, z1 - 0.1)); }
+    return g; };
+  W.idler = part("chrome", roller(false), { pos: [-XR, YA, 0] }); W.drive = part("chrome", roller(true), { pos: [XR, YA, 0] });
+
+  // ---------------------------------------------------------------- guide rails; the near one is open where the red cans leave
+  const railRun = (x0, x1, z) => { B.box("frame", (x0 + x1) / 2, YB + 0.3, z, x1 - x0, 0.3, 0.2); for (let x = x0 + 0.4; x < x1; x += 3.4) B.box("frame", x, YB + 0.08, z, 0.2, 0.16, 0.2); };
+  railRun(HX1, XR - 0.3, -(BW / 2 + 0.15)); railRun(HX1, PX + 0.6, BW / 2 + 0.15); railRun(SBX[1] + 0.3, XR - 0.3, BW / 2 + 0.15);
+
+  // ---------------------------------------------------------------- DC gear motor on the drive roller, held off the plate by four standoffs
+  for (const dx of [-0.62, 0.62]) for (const dy of [-0.62, 0.62]) B.cyl("chrome", 2, XR + dx, YA + dy, ZE + 0.575, 0.09, 0.09, 1.15, 10);
+  B.box("cast", XR, YA, ZE + 1.7, 1.5, 1.5, 1.1); B.cyl("motor", 2, XR, YA, ZE + 3.4, 0.62, 0.62, 2.3, 28); B.cyl("dark", 2, XR, YA, ZE + 4.6, 0.5, 0.5, 0.1, 20);
+  sCyl("motor", 2, [XR, YA, ZE + 2.9], 0.75, 3.5);
+
+  // ---------------------------------------------------------------- feed hood: the cans come out of its mouth
+  { const hy = (YB + 8.6) / 2, hh = 8.6 - YB, mw = CR + 0.25, mh = CH + 0.35;
+    for (const s of [-1, 1]) { B.box("shell", (HX0 + HX1) / 2, hy, s * ZP, HX1 - HX0, hh, 0.3); B.box("shell", HX1 - 0.075, hy, s * (mw + ZP + 0.15) / 2, 0.15, hh, ZP + 0.15 - mw); }
+    B.box("shell", (HX0 + HX1) / 2, 8.675, 0, HX1 - HX0, 0.15, 2 * ZP + 0.3); B.box("shell", HX0 + 0.075, hy, 0, 0.15, hh, 2 * ZP - 0.3);
+    B.box("shell", HX1 - 0.075, (YB + mh + 8.6) / 2, 0, 0.15, 8.6 - YB - mh, 2 * mw); B.box("yellow", HX1 + 0.01, YB + mh + 0.12, 0, 0.02, 0.24, 2 * mw);   // lintel with a warning stripe
+    sBox("hood", [HX0, YB, -ZE], [HX1, 8.75, ZE]); }
+
+  // ---------------------------------------------------------------- colour sensor on a bridge over the belt
+  for (const s of [-1, 1]) B.box("frame", XS, (YB + 9) / 2, s * ZP, 0.3, 9 - YB, 0.3);
+  B.box("frame", XS, 9.15, 0, 0.4, 0.3, 2 * ZP + 0.3); sBox("bridge", [XS - 0.2, YB, -(ZP + 0.15)], [XS + 0.2, 9.3, ZP + 0.15]);
+  for (const s of [-1, 1]) B.cyl("brass", 1, XS, 8.9, s * 0.45, 0.07, 0.07, 0.2, 8);
+  B.box("pcb", XS, 8.75, 0, 1.5, 0.1, 1.3); B.box("dark", XS, 8.65, 0, 0.42, 0.1, 0.42);                    // the board, face down, and the sensor chip
+  for (const s of [-1, 1]) B.box("lampOn", XS + s * 0.45, 8.66, 0, 0.16, 0.08, 0.16);                        // two white LEDs light the can
+  glow([XS, 8.5, 0], [1, 0.97, 0.9], 1.0);
+  const st = { seen: 0, act: 0 };                                                                             // set every frame, read by the lights and the signal
+  glow([XS, 8.45, 0], [1, 0.12, 0.08], 2.6, () => st.seen);                                                   // lights up while a red can is under the sensor
+
+  // ---------------------------------------------------------------- servo, hung over the far rail, and its arm
+  B.box("frame", PX - 0.5, (Y0 + 9.1) / 2, -3.8, 0.5, 9.1 - Y0, 0.5, "servoPost"); B.box("frame", PX - 0.02, Y0 + 0.2, -3.8, 0.45, 0.4, 0.5);
+  B.box("frame", PX - 0.5, 9.2, -3.125, 2.4, 0.2, 1.85);                                                        // bracket plate over the servo
+  B.box("dark", PX - 0.5, 8.15, PZ, 2.0, 1.9, 1.0); B.box("dark", PX - 0.5, 8.6, PZ, 2.7, 0.12, 1.0); sBox("servo", [PX - 1.5, 7.2, PZ - 0.5], [PX + 0.5, 9.1, PZ + 0.5]);
+  B.cyl("chrome", 1, PX, 7.15, PZ, 0.3, 0.3, 0.1, 16);
+  { const g = new Geo().merge(G.cyl(0.42, 0.42, 0.3, 20), T3(0, -0.05, 0)).merge(G.box(LA + 0.5, 1.2, 0.3), T3(LA / 2 - 0.25, -0.7, 0)).merge(G.box(LA - 1, 0.12, 0.5), T3(LA / 2, -0.16, 0));
+    W.arm = part("armPrint", g, { pos: [PX, PY, PZ] }); }
+
+  // ---------------------------------------------------------------- controller board on standoffs
+  B.box("pcb", CX, Y0 + 0.45, CZ, 3.6, 0.1, 2.6); sBox("ctrl", [CX - 1.8, Y0, CZ - 1.3], [CX + 1.8, Y0 + 0.9, CZ + 1.3]);
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) B.cyl("brass", 1, CX + sx * 1.6, Y0 + 0.2, CZ + sz * 1.1, 0.09, 0.09, 0.4, 8);
+  B.box("dark", CX - 0.2, Y0 + 0.6, CZ, 1.5, 0.2, 0.45); B.box("chrome", CX - 1.6, Y0 + 0.66, CZ + 0.5, 0.6, 0.32, 0.5);                // processor, USB socket
+  for (const sz of [-1, 1]) B.box("dark", CX, Y0 + 0.62, CZ + sz * 1.12, 2.6, 0.24, 0.12);                                               // pin headers
+  B.box("alu", CX + 1.1, Y0 + 0.72, CZ - 0.45, 0.7, 0.45, 0.7);                                                                        // heat sink of the motor driver
+  B.box("dark", CX + 1.72, Y0 + 0.35, CZ + 0.2, 0.3, 0.7, 2.0);                                                                       // terminal strip
+  W.led = part({ color: [0.05, 0.2, 0.08], emis: [0.2, 1.6, 0.5], rough: 0.3, cast: false }, G.box(0.14, 0.08, 0.14), { pos: [CX + 0.9, Y0 + 0.54, CZ + 0.6] });
+
+  // ---------------------------------------------------------------- the two bins, printed, each with a low wall on the conveyor side
+  const lying = (mat, x, z, alongZaxis) => { const m = M.trs([x, YF + CR, z], alongZaxis ? [PI / 2, 0, 0] : [0, 0, PI / 2], 1); B.g(mat, CAN.sleeve, m); B.g("canEnd", CAN.ends, m); };
+  const CAN = { sleeve: G.cyl(CR, CR, CH - 0.4, 28, false), ends: new Geo().merge(G.cyl(CR - 0.03, CR - 0.03, CH - 0.06, 28)).merge(G.tubeRing(CR, CR - 0.12, 0.1, 28), T3(0, HH - 0.05, 0)).merge(G.tubeRing(CR, CR - 0.12, 0.1, 28), T3(0, -HH + 0.05, 0)) };
+  { const [x0, x1] = SBX, [z0, z1] = SBZ, t = 0.15, top = 4.4, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;       // side bin, for the red cans
+    B.box("bin", cx, Y0 + t / 2, cz, x1 - x0 + 2 * t, t, z1 - z0 + 2 * t); B.box("bin", cx, (Y0 + 3.3) / 2, z0 - t / 2, x1 - x0 + 2 * t, 3.3 - Y0, t);
+    B.box("bin", cx, (Y0 + top) / 2, z1 + t / 2, x1 - x0 + 2 * t, top - Y0, t); for (const x of [x0 - t / 2, x1 + t / 2]) B.box("bin", x, (Y0 + top) / 2, cz, t, top - Y0, z1 - z0);
+    B.box("tagRed", cx, 3.2, z1 + t + 0.01, 2.4, 1.1, 0.02); sBox("binSide", [x0 - t, Y0, z0 - t], [x1 + t, top, z1 + t]);
+    lying("canRed", 7.55, 4.3, true); lying("canRed", 7.65, 6.85, false); }
+  { const [x0, x1] = EBX, zz = EBZ, t = 0.15, top = 4.4, cx = (x0 + x1) / 2;                                   // end bin, for the rest
+    B.box("bin", cx, Y0 + t / 2, 0, x1 - x0 + 2 * t, t, 2 * zz + 2 * t); B.box("bin", x0 - t / 2, Y0 + 0.3, 0, t, 0.6, 2 * zz + 2 * t);
+    B.box("bin", x1 + t / 2, (Y0 + top) / 2, 0, t, top - Y0, 2 * zz + 2 * t); for (const s of [-1, 1]) B.box("bin", cx, (Y0 + top) / 2, s * (zz + t / 2), x1 - x0, top - Y0, t);
+    B.box("tagGrey", cx, 3.2, zz + t + 0.01, 2.4, 1.1, 0.02); sBox("binEnd", [x0 - t, Y0, -zz - t], [x1 + t, top, zz + t]);
+    lying("canBlue", 16.5, -1.45, true);
+    B.g("canGreen", CAN.sleeve, T3(16.45, YF + HH, 1.6)); B.g("canEnd", CAN.ends, T3(16.45, YF + HH, 1.6)); }
+
+  // ---------------------------------------------------------------- the cans on the belt: red, blue, red, green, red, gold
+  W.cans = ["canRed", "canBlue", "canRed", "canGreen", "canRed", "canGold"].map((m) => {
+    const n = add(sc.root, { visible: false }); part(m, CAN.sleeve, { parent: n }); part("canEnd", CAN.ends, { parent: n }); return { n, red: m === "canRed" }; });
+
+  // ---------------------------------------------------------------- cables: sensor -> controller -> servo, controller -> motor
+  const cab = { bend: 0.35, f0: false, f1: false, collars: 0 }, yc = Y0 + 0.1, P_ = {};
+  P_.sig = pipe("sig", [[XS, 9.39, 0.9], [XS, 9.39, ZP + 0.24], [XS, yc, ZP + 0.24], [XS, yc, CZ - 0.5], [CX + 1.7, yc, CZ - 0.5]], 0.09, "cable", Object.assign({ a0: ["bridge"], a1: ["ctrl"] }, cab));
+  P_.srv = pipe("srv", [[CX + 1.7, yc, CZ + 0.2], [PX - 0.87, yc, CZ + 0.2], [PX - 0.87, yc, -3.8], [PX - 0.87, 8.3, -3.8], [PX - 0.87, 8.3, PZ - 0.5]], 0.09, "cable", Object.assign({ a0: ["ctrl"], a1: ["servo"] }, cab));
+  P_.pwr = pipe("pwr", [[CX + 1.7, yc, CZ + 0.9], [-2, yc, CZ + 0.9], [-2, yc, 8.8], [XR, yc, 8.8], [XR, yc, ZE + 5.2], [XR, YA, ZE + 5.2], [XR, YA, ZE + 4.6]], 0.09, "cable", Object.assign({ a0: ["ctrl"], a1: ["motor"] }, cab));
+  flow("sig", P_.sig, [0.45, 0.85, 1.0], 6, 0.3, 0.9, { size: 0.18 });
+  flow("srv", P_.srv, [1.0, 0.45, 0.25], 6, 0.3, 0.9, { size: 0.18, on: () => st.act });   // only between "red seen" and the end of the swing
+  flow("pwr", P_.pwr, [1.0, 0.85, 0.35], 6, 0.3, 0.9, { size: 0.18 });
+
+  // ---------------------------------------------------------------- one clock for everything that moves
+  onFrame((c) => {
+    const ph = c.cycle("cycle", CYC), run = ph * CYC * VB;                                 // ph: 0..1 once per cycle; run: belt travel since the cycle began
+    let arm = 0, seen = 0, act = 0;
+    W.cans.forEach((cn, i) => {
+      const t = ((ph + i / NC) % 1) * CYC, x = XS0 + VB * t; let p = [x, YC, 0], r = [0, 0, 0];
+      if (cn.red) { const tp = t - T_PUSH, tf = tp - T_EDGE;
+        if (tf >= REST_SIDE) p = HIDE;
+        else if (tf >= 0) { const f = SIDE.at(tf); p = [X_EDGE + VB * Math.min(tf, SIDE.tLand), f[1], ZE + f[0]]; r = [f[2], 0, 0]; }
+        else if (tp > 0) p = [x, YC, pushZ(tp)];
+        if (tp > 0 && tp < TS + TD + TR) arm = armAt(tp);
+        seen = Math.max(seen, sm(1 - Math.abs(x - XS) / 1.4)); if (t > T_SENSE && tp < TS) act = 1;
+      } else { const te = t - T_END;
+        if (te >= REST_END) p = HIDE;
+        else if (te >= 0) { const f = END.at(te); p = [XR + f[0], f[1], 0]; r = [0, 0, -f[2]]; } }
+      cn.n.visible = p !== HIDE; if (p !== HIDE) { cn.n.pos = p; cn.n.rot = r; }
+    });
+    W.arm.rot = [0, -arm, 0];
+    W.marks.pos = [run % 3, 0, 0];
+    W.idler.rot = W.drive.rot = [0, 0, -run / RB];
+    st.seen = seen; st.act = act;
+    const b = 0.65 + 0.35 * c.osc(2.6); W.led.emis = [0.2 * b, 1.6 * b, 0.5 * b];
+  });
+
+  // ---------------------------------------------------------------- callouts and cameras, all on the near side.
+  // A can first appears 3.2 units inside the hood: keep every camera less than about 45 degrees downstream of its mouth, so nobody sees that.
+  label("Feed hood", [(HX0 + HX1) / 2, 9.0, 0]); label("Colour sensor", [XS, 9.6, 0]); label("Controller", [CX, Y0 + 1.2, CZ]);
+  label("Servo arm", [PX - 0.5, 9.6, PZ]); label("DC gear motor", [XR, YA + 0.9, ZE + 3.4]); label("Red bin", [(SBX[0] + SBX[1]) / 2, 4.6, SBZ[1]]); label("End bin", [(EBX[0] + EBX[1]) / 2, 4.6, EBZ]);
+  cam("whole", { eye: [3, 15, 36], target: [2.5, 1.5, 1], fov: 40 });
+  cam("cover", { eye: [29, 13.5, 37], target: [3, 4.2, 0], fov: 40 });
+  cam("sensor", { eye: [-12.5, 12.5, 18], target: [-4.5, 5.2, 1.5], fov: 40 });
+  cam("arm", { eye: [PX + 9, 14, 21], target: [PX + 3, 5.4, 1], fov: 38 });
+  cam("end", { eye: [XR + 7, 9, 15], target: [XR + 2.5, 4, 0], fov: 38 });
+})();
+</script>
+<script>/* ctrl.js: the slide controller. Each <section class="slide"> tells the stage what to show through data- attributes:
+     data-scene   which scene (default: the first one scene.js creates)
+     data-cam     camera name (default: the scene's first camera)
+     data-shift   lens shift: where the subject sits sideways, -1..1 (default 0.3 beside a left panel, -0.3 beside a right one)
+     data-dim     0..1 darkens the scene behind a text or chart slide
+     data-orbit   slow orbit, radians per second
+     data-labels  comma-separated callouts to show
+     data-hero    the journey the hero drop travels
+     data-chapter the running head, data-notes the speaker notes
+   Any other data- attribute reaches scene.js as c.d.name / c.num("name", default).
+   ?capture in the address removes every transition (screenshots, tests). */
+(function () {
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const IMG = (window.ASSETS && window.ASSETS.img) || {};
+  document.querySelectorAll('[data-asset]').forEach((im) => { const a = IMG[im.dataset.asset]; if (a) im.src = a; else console.error("no picture '" + im.dataset.asset + "' in assets.js"); });
+  const CAP = /capture/.test(location.search); if (CAP) { document.body.classList.add('capture'); window.__CUT = true; }
+  const el = (id) => document.getElementById(id);
+  STAGE.start();
+  let cur = -1;
+  function go(i) {
+    i = Math.max(0, Math.min(slides.length - 1, i)); if (i === cur) return;
+    if (cur >= 0) slides[cur].classList.remove('on');
+    cur = i; const s = slides[i]; s.classList.add('on');
+    // restart the slide's own drawings
+    s.querySelectorAll('svg').forEach((svg) => { try { svg.setCurrentTime(CAP ? 60 : 0); } catch (e) {} });
+    if (!CAP) s.querySelectorAll('.draw,.pop').forEach((n) => { n.style.animation = 'none'; n.offsetHeight; n.style.animation = ''; });
+    const d = s.dataset, num = (k, def) => (d[k] == null || d[k] === '' ? def : +d[k]);
+    window.PRES3D.setSlide({ d, scene: d.scene, cam: d.cam, hero: d.hero, dim: num('dim', 0), orbit: num('orbit', 0), cut: !!window.__CUT,
+      labels: d.labels ? d.labels.split(',').map((t) => t.trim()).filter(Boolean) : [],
+      shift: num('shift', s.querySelector('.panel.left') ? 0.3 : s.querySelector('.panel.right') ? -0.3 : 0) });
+    document.body.classList.toggle('on-cover', s.classList.contains('cover'));
+    if (el('chap')) el('chap').textContent = d.chapter || '';
+    if (el('count')) el('count').textContent = String(i + 1).padStart(2, '0') + ' / ' + String(slides.length).padStart(2, '0');
+    if (el('prog')) el('prog').style.width = ((i + 1) / slides.length * 100) + '%';
+    if (i > 0 && el('hint')) el('hint').style.opacity = 0;
+    if (location.hash !== '#' + (i + 1)) history.replaceState(null, '', '#' + (i + 1));
+  }
+  window.goSlide = go;
+  document.addEventListener('keydown', (e) => {
+    if (['ArrowRight', 'PageDown', ' ', 'Enter'].includes(e.key)) { e.preventDefault(); go(cur + 1); }
+    else if (['ArrowLeft', 'PageUp', 'Backspace'].includes(e.key)) { e.preventDefault(); go(cur - 1); }
+    else if (e.key === 'Home') go(0); else if (e.key === 'End') go(slides.length - 1);
+    else if (e.key === 'f' || e.key === 'F') { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); }
+  });
+  document.addEventListener('click', (e) => { if (e.clientX > innerWidth * 0.25) go(cur + 1); else go(cur - 1); });
+  const h = parseInt((location.hash || '#1').slice(1), 10) || 1; go(h - 1);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!-- deck: lang=en dir=ltr -->
+<title>Colour-Sorting Conveyor</title>
+<meta name="author" content="Team Name">
+<div id="logo"><div>University Name<br>College of Engineering &middot; COURSE 0000</div></div>
+
+<!-- ======================= COVER ======================= -->
+<section class="slide cover" data-chapter="" data-cam="cover" data-shift="0.45" data-orbit="0.003"
+  data-notes="Good morning. This is our project: a small conveyor that sorts cans by their colour.">
+  <div class="bar-side"></div>
+  <div class="cv">
+    <div class="cv-uni a"><div><b>University Name</b><span>College of Engineering</span><span>Department Name</span></div></div>
+    <div class="cv-rule"></div>
+    <h1 class="a d1">Colour-Sorting<br>Conveyor</h1>
+    <p class="cv-sub a d2">A small belt that picks the red cans out of the line</p>
+    <div class="cv-chip a d3">COURSE 0000<i>&middot;</i>COURSE NAME</div>
+    <div class="cv-fill"></div>
+    <div class="cv-line a d4"></div>
+    <div class="cv-team a d4">
+      <div><h4>Submitted to</h4><p>Dr. Instructor Name</p></div>
+      <div><h4>Submitted by</h4>
+        <table>
+          <tr><td>First Student Name</td><td>000000001</td></tr>
+          <tr><td>Second Student Name</td><td>000000002</td></tr>
+          <tr><td>Third Student Name</td><td>000000003</td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="cv-place a d5">City<i>&middot;</i>Month Year</div>
+  </div>
+</section>
+
+<!-- ======================= THE WHOLE DEVICE ======================= -->
+<section class="slide" data-chapter="The device" data-cam="whole"
+  data-labels="Colour sensor,Servo arm,DC gear motor,Red bin,End bin"
+  data-notes="The device has three working parts: a motor that drives the belt, a colour sensor above it, and a servo arm. Red cans go to the side bin, all the others ride to the end.">
+  <div class="panel bottom">
+    <div class="kick a">The whole device</div>
+    <h2 class="a d1">One belt, one sensor, <em>one arm</em></h2>
+    <div class="body">
+      <p class="a d2">A DC gear motor turns the drive roller and the belt carries the cans at <span class="nb">8 cm/s</span>, one can every <span class="nb">1.5 s</span>. A colour sensor above the belt reads each can as it passes.</p>
+      <p class="a d3">A servo arm pushes the <b>red</b> cans into the side bin. Every other can rides on and drops into the bin at the end of the belt.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= THE COLOUR SENSOR ======================= -->
+<section class="slide" data-chapter="The device" data-cam="sensor" data-labels="Colour sensor,Feed hood,Controller"
+  data-notes="The sensor hangs from a bridge, close above the cans. It lights the can with white LEDs and measures the red, green and blue light that comes back. The controller compares the three values and decides whether the can is red.">
+  <div class="panel right">
+    <div class="kick a">Station 1 &middot; Reading</div>
+    <h2 class="a d1">The <em>colour sensor</em> reads every can</h2>
+    <p class="a d2">The sensor hangs from a bridge about <span class="nb">2 cm</span> above the cans. Two white LEDs light the can below, and the chip measures how much red, green and blue light comes back.</p>
+    <p class="a d3">The controller compares the three values. When red is clearly the strongest, it marks the can as red and starts a timer for the arm.</p>
+  </div>
+</section>
+
+<!-- ======================= THE SORTING ARM ======================= -->
+<section class="slide" data-chapter="The device" data-cam="arm" data-labels="Servo arm,Red bin"
+  data-notes="The arm is twelve centimetres downstream of the sensor. At eight centimetres a second the can needs one and a half seconds to get there, so the controller waits that long and then swings the servo. The arm is back before the next can arrives.">
+  <div class="panel left">
+    <div class="kick a">Station 2 &middot; Sorting</div>
+    <h2 class="a d1">The <em>servo arm</em> pushes red cans aside</h2>
+    <p class="a d2">The arm waits <span class="nb">12 cm</span> after the sensor. At <span class="nb">8 cm/s</span> a can needs <b class="nb">12 &divide; 8 = 1.5 s</b> to arrive, so the controller waits that long and then swings the servo.</p>
+    <p class="a d3">The arm sweeps about <span class="nb">70&deg;</span> across the belt, slides the can over the edge into the red bin, and returns before the next can comes.</p>
+  </div>
+</section>
+
+<!-- ======================= END ======================= -->
+<section class="slide" data-chapter="Thank you" data-cam="cover" data-shift="0.45" data-orbit="0.004"
+  data-notes="Thank you. We are happy to take your questions.">
+  <div class="titlecard">
+    <div class="k a">THANK YOU</div>
+    <h1 class="a d1">Any<br><span>questions?</span></h1>
+    <div class="sub a d2">A motor, a colour sensor and a servo arm: red cans to the side, the rest to the end.</div>
+  </div>
+</section>
