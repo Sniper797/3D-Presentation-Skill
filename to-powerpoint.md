@@ -7,6 +7,9 @@ Two files come out of one built deck, and the HTML stays the master:
 | **Still** | Every slide is the captured 3D scene as a background picture, with native, editable text boxes and shapes at the positions measured in the browser. Theme colours and fonts from the deck's palette, two layouts, sections by chapter, speaker notes, a fade between slides. |
 | **Motion** | The still deck plus, behind the text of every slide whose scene is visible: a clip of the camera flying in from the previous slide (2.4 s, once), then the scene in motion as a clip that repeats until the slide is left. Callouts fade in after the camera arrives. |
 
+A third output needs no PowerPoint: `--text` on the recorder keeps the slide text in the picture and joins every flight
+and loop into one film (55 s and 12 MB for a 5-slide deck), for a phone, a message, or a screen with no browser.
+
 For motion that is not this pattern (a clip on its own slide, PowerPoint's own effects, Morph, a chart that grows),
 use `animating-pptx-decks`.
 
@@ -18,6 +21,7 @@ Run from the skill folder. `<deck>` is the folder that holds `out/index.html`.
 python pptx/capture.py <deck>                                  -> <deck>/pptx/cap/  bg-NN.jpg, ref-NN.jpg, layout.json
 node pptx/build_pptx.js <deck> [out.pptx]                      -> <deck>/pptx/<deck>.pptx          (still)
 python pptx/capture_video.py <deck> [slide numbers] [--crf 26] -> <deck>/pptx/vid/  loop-NN.mp4, fly-NN.mp4, videos.json
+python pptx/capture_video.py <deck> --text                     -> <deck>/video/walkthrough.mp4   (the deck as a film)
 powershell -File pptx/add_motion.ps1 -Deck <still.pptx> -Vid <deck>/pptx/vid -Out <motion.pptx>
 powershell -File pptx/export_slides.ps1 -Deck <any.pptx> -Out <folder> -Slides "2,5,9"     (pictures to look at)
 powershell -File pptx/test_show.ps1 -Deck <motion.pptx> -Slides "5,9"                      (reads PowerPoint's players)
