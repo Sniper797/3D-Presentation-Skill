@@ -92,14 +92,15 @@ Not yet tried:
 
 ## Where it came from
 
-The format, the look and the first version of the engine came from a student team's project presentation about a steam power plant: one world, with the camera flying between its parts. This skill turned that way of presenting into a general method for any project, and added the measuring. The plant scene itself is that team's work, so it is not in this repository.
+This skill grew out of a collaboration between **Ahmed Saif** and Mohammad Ghassan. Ahmed made the original presentation for his team's steam power plant project; Mohammad took it and improved it with Ahmed's own prompt. The format, the look and the first version of the engine come from that presentation: one world, with the camera flying between its parts. This skill then turned that way of presenting into a general method for any project, and added the measuring. The plant scene itself is the team's work, so it is not in this repository.
 
 ## License
 
 Copyright (c) 2026 Mohammad Ghassan. Released under the [PolyForm Strict License 1.0.0](LICENSE.md):
 
 - **Allowed:** downloading and using it for learning, experiments and personal projects, and at universities and non-profit organizations.
-- **Not allowed without written permission:** changing it, building other work on it, redistributing or passing it on, or commercial use. Anyone who wants it should download it from here.
+- **The deck you build is yours:** your scene, slides and text belong to you, and you may send, publish and present the built file to anyone, with the engine embedded in it. Whoever receives it may open it and show it. This is an additional permission, written at the top of [LICENSE.md](LICENSE.md).
+- **Not allowed without written permission:** changing it, building other tools on it, taking the engine out of a built deck to use it on its own, redistributing or passing it on, or commercial use. Anyone who wants it should download it from here.
 
 For permission or collaboration, reach out on [GitHub](https://github.com/Sniper797).
 

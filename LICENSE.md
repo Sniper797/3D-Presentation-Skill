@@ -1,5 +1,18 @@
 Required Notice: Copyright (c) 2026 Mohammad Ghassan (https://github.com/Sniper797)
 
+# Additional Permission for Built Presentations
+
+The licensor grants you this permission in addition to the PolyForm Strict License 1.0.0 below. Words that the license defines mean the same here.
+
+A **built presentation** is the single HTML file that the software's build script (`build.py`) makes from a scene and slides of your own, with the software's engine (`engine/mini3d.js`, `engine/stage.js`, `engine/ctrl.js`, `engine/deck.css`) embedded in it, together with any pictures, video or PowerPoint file made from that HTML file.
+
+1. **Making.** You may make built presentations for any permitted purpose. You may start your scene and slides from the examples in `example/` and `example-conveyor/`. Writing a scene and slides for the software, and building them, does not count as making changes or new works based on the software.
+2. **Sharing.** You may copy, send, publish and present your built presentations to anyone, with the engine embedded in them as the build script put it there.
+3. **Receiving.** Anyone who receives a built presentation may open it, show it and pass it on unchanged.
+4. **Your content.** The scene, slides, text and media you made for a built presentation are yours. The licensor claims no rights in them.
+
+This permission covers the engine only as part of a built presentation. It does not allow taking the engine out of a built presentation to use, change or distribute it on its own, and it does not allow distributing the rest of the software. Everything else stays under the license below, and so do the purposes it permits.
+
 # PolyForm Strict License 1.0.0
 
 <https://polyformproject.org/licenses/strict/1.0.0>
